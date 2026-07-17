@@ -1,0 +1,81 @@
+.viewer{
+
+    position:relative;
+
+    width:85%;
+
+    height:65%;
+
+    border-radius:14px;
+
+    overflow:hidden;
+
+
+}
+
+.viewer::before{
+    content: "";
+  position: absolute;
+  inset: 0;
+  padding: 0.7px; /* debljina bordera */
+  border-radius: inherit;
+
+  background:linear-gradient(
+        70deg,
+        #050E1A 0%,
+        #0A1C35 10%,
+        #264064 40%
+    );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  pointer-events: none;
+}
+.viewer-title{
+
+    position:absolute;
+
+    top:18px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+    text-align:center;
+
+}
+
+.viewer-title h3{
+
+    color:white;
+
+    font-size:18px;
+
+    font-weight:600;
+
+}
+
+.viewer-title p{
+
+    color:#999;
+
+    margin-top:6px;
+
+}
+
+.model-image{
+
+    width:70%;
+
+    height:70%;
+
+    object-fit:contain;
+    position: relative;
+    margin-top: 15vh;
+    margin-left: 10vw;
+
+}

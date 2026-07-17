@@ -1,0 +1,38 @@
+body{
+
+    margin:0;
+
+}
+
+.model-page{
+
+    min-height:100vh;
+
+    display:flex;
+
+    gap:30px;
+
+    padding:16px;
+
+    background:#050E1A;
+
+    background:linear-gradient(
+        194deg,
+        #050E1A 0%,
+        #0A1C35 50%,
+        #264064 100%
+    );
+
+}
+
+.left-side{
+
+    flex:1;
+
+}
+
+.right-side{
+
+    width:370px;
+
+}

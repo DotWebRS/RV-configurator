@@ -1,0 +1,65 @@
+.choose-model{
+
+    display:flex;
+    flex-direction:column;
+
+}
+
+.choose-model-title{
+
+    color:var(--text-primary);
+
+    font-family:'Open Sans',sans-serif;
+
+    font-size:20px;
+
+    font-weight:500;
+    color: #CECFD2;
+
+}
+
+.choose-model-tabs{
+
+    display:flex;
+    max-width: max-content;
+    color: #94979C;
+    gap:8px;
+    background: #071528;
+    border: 0.1px solid #22262f;
+    border-radius: 12px;
+    margin-bottom: 2vh;
+}
+
+.tab{
+
+    height:38px;
+
+    padding:0 18px;
+
+    background:var(--button-background);
+
+    border:1px solid var(--border);
+
+    border-radius:7px;
+
+    color:var(--text-secondary);
+
+    cursor:pointer;
+
+    transition:var(--transition);
+
+}
+
+.tab:hover{
+
+    color:var(--text-primary);
+
+}
+
+.active{
+
+    background:var(--tab-active);
+
+    color:var(--text-primary);
+
+}

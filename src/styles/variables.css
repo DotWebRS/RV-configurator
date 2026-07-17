@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
+:root {
+
+  --background-dark: #050E1A;
+  --background-middle: #0A1C35;
+  --background-light: #264064;
+
+  --viewer-background: #071528;
+
+  --border: #22262F;
+
+  --text-primary: #CECFD2;
+  --text-secondary: #94979C;
+  --text-disabled: #85888E;
+
+  --button-background: #071528;
+
+  --tab-active: #264064;
+
+  --transition: .25s ease;
+
+  --radius-small: 6px;
+  --radius-medium: 10px;
+  --radius-large: 14px;
+
+}
+
+html,
+body,
+#root {
+  font-family: 'Open Sans', sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
