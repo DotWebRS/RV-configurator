@@ -375,6 +375,24 @@
     align-items: center;
 
 }
+.fullscreen-background{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        194deg,
+        #050E1A 0%,
+        #0A1C35 50%,
+        #264064 100%
+    );
+    z-index: 9998;
+
+}
+.not-visible{
+    display: none;
+}
 @media(max-width:1550px){
     .viewer{
 

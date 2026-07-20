@@ -16,11 +16,12 @@ const Viewer = () => {
             scrollPosition.current = window.scrollY;
 
             window.scrollTo(0, 0);
-
+            document.querySelector(".fullscreen-background")?.classList.remove("not-visible");
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "auto";
-
+            
+            document.querySelector(".fullscreen-background")?.classList.add("not-visible");
             window.scrollTo(0, scrollPosition.current);
         }
 
@@ -30,6 +31,11 @@ const Viewer = () => {
     }, [isFullscreen]);
 
     return (
+        <>
+        <div className="not-visible fullscreen-background">
+
+        </div>
+        
 
         <div className={`viewer ${isFullscreen ? "fullscreen" : ""}`}
             style={{
@@ -168,7 +174,7 @@ const Viewer = () => {
         </div>
 
 
-        
+        </>
     );
 
 };
