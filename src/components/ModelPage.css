@@ -1,6 +1,7 @@
 body{
 
     margin:0;
+    overflow-x: hidden;
 
 }
 
@@ -24,7 +25,8 @@ body{
 
 .right-side{
 
-    width:370px;
+    width:25vw;
+    margin-right: 3vw;
 
 }
 .viewer-bottom{
@@ -32,4 +34,43 @@ body{
     gap:40px;
     margin-top:20px;
     align-items:flex-start;
+}
+
+@media (max-width: 768px){
+
+    .model-page{
+
+        flex-direction:column;
+
+        gap:20px;
+
+        padding:12px;
+
+    }
+
+
+    .left-side{
+
+        width:100%;
+
+    }
+
+
+    .right-side{
+
+        width:100%;
+
+        margin-right:0;
+
+    }
+
+
+    .viewer-bottom{
+
+        flex-direction:column;
+
+        gap:25px;
+
+    }
+
 }

@@ -60,3 +60,33 @@
     border-left: 1px solid #22262F;
     border-right: 1px solid #22262F;
 }
+
+@media(max-width:768px){
+
+    .choose-model-title{
+
+        font-size:18px;
+
+    }
+
+
+    .choose-model-tabs{
+
+        max-width:100%;
+
+        overflow-x:auto;
+
+    }
+
+
+    .tab{
+
+        padding:0 14px;
+
+        white-space:nowrap;
+
+        font-size:14px;
+
+    }
+
+}

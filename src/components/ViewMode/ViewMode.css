@@ -1,6 +1,6 @@
 .view-mode{
 
-    width:8vw;
+    width:10vw;
 
     display:flex;
     flex-direction:column;
@@ -86,5 +86,46 @@
     height:20px;
 
     object-fit:contain;
+
+}
+
+@media(max-width:768px){
+
+
+.view-mode{
+
+    width:100%;
+
+    padding-right:0;
+
+    border-right:none;
+
+    border-bottom:1px solid #5B5E66;
+
+    padding-bottom:20px;
+
+}
+
+
+
+.view-mode-buttons{
+
+    flex-direction:row;
+
+}
+
+
+
+.view-button{
+
+    width:auto;
+
+    flex:1;
+
+    height:45px;
+
+    font-size:14px;
+
+}
 
 }

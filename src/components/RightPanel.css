@@ -1,0 +1,449 @@
+.right-panel{
+
+    display:flex;
+    flex-direction:column;
+
+    height:100vh;
+    width: 25vw;
+    margin-top: 1vh;
+    border-radius: 10px;
+    background: #0A1C35;
+    padding: 1vw;
+}
+
+.right-title{
+
+    margin:0;
+
+    color:#F7F7F7;
+
+    font-size:18px;
+
+    font-weight:700;
+
+    line-height:28px;
+    padding: 5px;
+
+}
+
+.right-step{
+
+    margin-top:8px;
+
+    color:#CECFD2;
+    padding: 5px;
+    font-size:16px;
+
+}
+
+.right-step strong{
+
+    color:#F7F7F7;
+
+    font-weight:700;
+
+}
+
+.right-buttons{
+
+    display:flex;
+
+    gap:8px;
+    padding: 5px;
+    width: 15vw;
+
+    margin-bottom:16px;
+
+}
+
+.step-button{
+
+    flex:1;
+
+    height:5vh;
+
+    background:#071528;
+
+    border:1px solid #22262F;
+
+    border-radius:8px;
+
+    color:#CECFD2;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.step-button:hover{
+
+    background:#10203A;
+
+}
+
+.right-divider{
+
+    width:90%;
+
+    height:1px;
+
+    background:#373A41;
+
+    margin-bottom:24px;
+    position: relative;
+    margin-left: 1vw;
+
+}
+
+.floorplan-container{
+
+    height:360px;
+
+    overflow-y:auto;
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:16px;
+
+    padding:5px;
+
+    padding-right:8px;
+    margin-bottom:22px;
+
+}
+
+.floor-card{
+
+    border:2px solid transparent;
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+    background:#0C2342;
+
+    cursor:pointer;
+
+    transition:.25s;
+    height: 45vh;
+
+}
+
+.floor-card.active{
+
+    border:2px solid #B3B8DB;
+
+}
+
+.floor-image{
+
+    position:relative;
+
+    height:140px;
+
+}
+
+.floor-image img:first-child{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:cover;
+
+}
+
+.check-icon{
+
+    position:absolute;
+
+    top:8px;
+    left:8px;
+
+    width:22px;
+    height:22px;
+
+}
+
+.zoom-button{
+
+    position:absolute;
+
+    right:8px;
+    bottom:8px;
+
+    width:28px;
+    height:28px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    border:none;
+
+    border-radius:6px;
+
+    background:#071528;
+
+    cursor:pointer;
+
+}
+
+.zoom-button img{
+
+    width:16px !important;
+    height:16px !important;
+
+}
+
+.floor-content{
+
+    padding:10px 12px 14px;
+
+}
+
+.floor-content h4{
+
+    margin:0 0 6px;
+
+    color:#F7F7F7;
+
+    font-size:18px;
+
+    font-weight:600;
+
+}
+
+.floor-content p{
+
+    margin:2px 0;
+
+    color:#CECFD2;
+
+    font-size:13px;
+
+    line-height:18px;
+
+}
+
+.build-summary{
+
+    margin-top:auto;
+
+    background:#0C2342;
+
+    border:1px solid #373A41;
+
+    border-radius:10px;
+
+    padding: 10px;
+    margin: 5px;
+
+}
+
+.build-summary h3{
+
+    margin:0 0 18px;
+
+    color:#F7F7F7;
+
+    font-size:18px;
+
+    font-weight:600;
+
+}
+
+.summary-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    margin-bottom:8px;
+
+    color:#94979C;
+
+    font-size:15px;
+
+}
+
+.total{
+
+    color:#F7F7F7;
+
+    font-weight:700;
+
+    font-size:18px;
+
+}
+
+.build-summary hr{
+
+    border:none;
+
+    border-top:1px solid #373A41;
+
+    margin:14px 0;
+
+}
+
+.summary-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:18px;
+
+    color:#CECFD2;
+
+    font-size:14px;
+
+}
+
+.view-all{
+
+    color:#0086C9;
+
+    cursor:pointer;
+
+}
+
+.summary-buttons{
+
+    display:flex;
+
+    gap:16px;
+
+}
+
+.review-button{
+
+    flex:1;
+
+    height:38px;
+
+    background:transparent;
+
+    border:1px solid #373A41;
+
+    border-radius:8px;
+
+    color:#F7F7F7;
+
+    cursor:pointer;
+
+}
+
+.send-button{
+
+    flex:1;
+
+    height:38px;
+
+    background:#071528;
+
+    border:1px solid #373A41;
+
+    border-radius:8px;
+
+    color:#F7F7F7;
+
+    cursor:pointer;
+
+}
+
+.review-button:hover,
+.send-button:hover,
+.zoom-button:hover{
+
+    opacity:.85;
+
+}
+
+/* Chrome, Edge, Safari */
+
+.floorplan-container::-webkit-scrollbar {
+
+    width: 4px;
+
+}
+
+.floorplan-container::-webkit-scrollbar-track {
+
+    background: transparent;
+
+}
+
+.floorplan-container::-webkit-scrollbar-thumb {
+
+    background: #5C6880;
+
+    border-radius: 999px;
+
+}
+
+.floorplan-container::-webkit-scrollbar-thumb:hover {
+
+    background: #74839E;
+
+}
+
+@media(max-width:768px){
+
+
+.right-panel{
+
+    width:auto;
+
+    height:auto;
+
+    padding:15px;
+
+    margin-top:20px;
+
+}
+
+
+
+.right-buttons{
+
+    width:100%;
+
+}
+
+
+
+.floorplan-container{
+
+    height:auto;
+
+    max-height:500px;
+
+    grid-template-columns:1fr;
+
+}
+
+
+
+.floor-card{
+
+    height:auto;
+
+}
+
+
+
+.floor-image{
+
+    height:180px;
+
+}
+
+
+}

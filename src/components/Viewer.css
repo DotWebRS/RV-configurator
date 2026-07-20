@@ -2,9 +2,9 @@
 
     position:relative;
 
-    width:80%;
+    width:95%;
 
-    height:70%;
+    height:75%;
 
     border-radius:14px;
 
@@ -199,7 +199,6 @@
     border-radius: 8px;
 
     overflow: hidden;
-    padding: 1px;
 
 }
 
@@ -376,5 +375,177 @@
 
     display: flex;
     align-items: center;
+
+}
+
+@media(max-width:768px){
+
+
+    .viewer{
+
+        width:100%;
+
+        height: clamp(280px, 38vh, 420px);
+        min-height: 280px;
+        background: linear-gradient(
+        230deg,
+        #050E1A 0%,
+        #0A1C35 75%,
+        #264064 100%
+    );
+
+    }
+
+
+
+    .model-image{
+
+        width:85%;
+
+        height:70%;
+
+        margin-top:4vh;
+
+        margin-left:7.5%;
+
+    }
+
+
+
+    .viewer-title{
+
+        display: none;
+
+    }
+
+
+
+    .view-badge{
+
+        width:50px;
+
+        height:50px;
+
+        top:15px;
+
+        right:15px;
+
+    }
+
+
+
+    .rotate-hint{
+
+        top:15px;
+
+        left:15px;
+
+    }
+
+
+
+    .rotate-text{
+
+        font-size:12px;
+
+        width:auto;
+
+    }
+
+
+
+
+
+
+    .reset-button span{
+
+        display:none;
+
+    }
+
+
+}
+
+@media(max-width:768px){
+
+    .cursor-controls,
+    .zoom-controls,
+    .viewer-actions{
+
+        height:32px;
+
+        display:flex;
+
+        align-items:center;
+
+    }
+
+
+    .cursor-controls{
+
+        display: none;
+
+    }
+
+
+    .icon-button{
+
+        width:32px;
+
+        height:32px;
+
+        display:flex;
+
+        align-items:center;
+
+        justify-content:center;
+
+        padding:0;
+
+    }
+
+
+    .zoom-controls{
+
+        bottom:15px;
+        left: 15px;
+        transform: none;
+
+    }
+
+
+    .viewer-actions{
+
+        bottom:15px;
+
+        right:15px;
+
+        
+
+    }
+
+
+    .reset-button{
+
+        width:34px;
+
+        height:34px;
+
+        padding:0;
+
+        display:flex;
+
+        align-items:center;
+
+        justify-content:center;
+
+    }
+    .reset-button img{
+        width: 14px;
+        height: 14px;
+    }
+    .fullscreen-button{
+        display: none;
+    }
 
 }

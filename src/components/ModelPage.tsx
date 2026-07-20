@@ -1,5 +1,5 @@
 import "./ModelPage.css";
-
+import RightPanel from "./RightPanel";
 import ChooseModel from "./ChooseModel";
 import Viewer from "./Viewer";
 import ViewMode from "./ViewMode/ViewMode";
@@ -23,7 +23,7 @@ const ModelPage = () => {
             </div>
 
             <div className="right-side">
-
+                <RightPanel/>
             </div>
 
         </div>

@@ -1,44 +1,35 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import "./CameraView.css";
 import { cameraViews } from "../data";
 
-const CARD_WIDTH = 118;
-const GAP = 16;
 
 const CameraView = () => {
 
-    const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedView, setSelectedView] = useState<string | null>(null);
+    const sliderRef = useRef<HTMLDivElement>(null);
+    
 
-    const visibleCards = 5;
-
-    const maxIndex = cameraViews.length - visibleCards;
-
-    const handlePrevious = () => {
-
-        if (currentIndex > 0) {
-
-            setCurrentIndex(currentIndex - 1);
-
-        }
-
-    };
-
-    const handleNext = () => {
-
-        if (currentIndex < maxIndex) {
-
-            setCurrentIndex(currentIndex + 1);
-
-        }
-
-    };
 
     const handleCardClick = (view: string) => {
 
         setSelectedView(view);
 
         console.log(`Kliknuo sam na ${view} View`);
+
+    };
+
+    const scrollSlider = (direction:"left"|"right") => {
+
+        if(!sliderRef.current) return;
+
+
+        sliderRef.current.scrollBy({
+
+            left: direction === "right" ? 300 : -300,
+
+            behavior:"smooth"
+
+        });
 
     };
 
@@ -54,7 +45,7 @@ const CameraView = () => {
 
                 <button
                     className="camera-arrow"
-                    onClick={handlePrevious}
+                    onClick={() => scrollSlider("left")}
                 >
 
                     <img
@@ -64,13 +55,10 @@ const CameraView = () => {
 
                 </button>
 
-                <div className="camera-window">
+                <div className="camera-window" ref={sliderRef}>
 
                     <div
                         className="camera-track"
-                        style={{
-                            transform: `translateX(-${currentIndex * (CARD_WIDTH + GAP)}px)`
-                        }}
                     >
 
                         {
@@ -108,7 +96,7 @@ const CameraView = () => {
 
                 <button
                     className="camera-arrow"
-                    onClick={handleNext}
+                    onClick={() => scrollSlider("right")}
                 >
 
                     <img
