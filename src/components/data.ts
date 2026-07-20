@@ -5,3 +5,11 @@ export const models = [
     "Luxe Toy Hauler",
     "Luxe Regent"
 ];
+export const cameraViews = [
+    "Front View",
+    "Back View",
+    "Left View",
+    "Right View",
+    "Top View",
+    "Down View",
+];

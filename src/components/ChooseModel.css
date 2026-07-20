@@ -36,18 +36,15 @@
 
     padding:0 18px;
 
-    background:var(--button-background);
+    background: transparent;
+    border: 1px solid transparent;
 
-    border:1px solid var(--border);
+    border-radius: 7px;
 
-    border-radius:7px;
+    color: #94979C;
 
-    color:var(--text-secondary);
-
-    cursor:pointer;
-
-    transition:var(--transition);
-
+    cursor: pointer;
+    transition: 0.3s;
 }
 
 .tab:hover{
@@ -56,10 +53,10 @@
 
 }
 
-.active{
+.tab.active {
+    background: #264064;
+    color: #CECFD2;
 
-    background:var(--tab-active);
-
-    color:var(--text-primary);
-
+    border-left: 1px solid #22262F;
+    border-right: 1px solid #22262F;
 }

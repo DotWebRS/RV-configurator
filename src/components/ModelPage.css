@@ -6,22 +6,13 @@ body{
 
 .model-page{
 
-    min-height:100vh;
+    min-height:100%;
 
     display:flex;
 
     gap:30px;
 
     padding:16px;
-
-    background:#050E1A;
-
-    background:linear-gradient(
-        230deg,
-        #050E1A 0%,
-        #0A1C35 75%,
-        #264064 100%
-    );
 
 }
 
@@ -35,4 +26,10 @@ body{
 
     width:370px;
 
+}
+.viewer-bottom{
+    display:flex;
+    gap:40px;
+    margin-top:20px;
+    align-items:flex-start;
 }
