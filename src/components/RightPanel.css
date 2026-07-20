@@ -392,6 +392,47 @@
     background: #74839E;
 
 }
+@media(max-width:1550px){
+    .right-panel{
+        height: 90vh;
+    }
+    .review-button{
+        height: 35px;
+    }
+    .send-button{
+        height: 35px;
+    }
+    .summary-header{
+        font-size: 11px;
+    }
+    .total{
+        font-size: 15px;
+    }
+    .summary-row{
+        font-size: 13px;
+    }
+    .build-summary h3{
+        font-size: 15px;
+    }
+    .floor-content p{
+        font-size: 10px;
+    }
+    .floor-content h4{
+        font-size: 15px;
+    }
+    .right-step{
+        font-size: 13px;
+    }
+    .right-title{
+        font-size: 15px;
+    }
+    .floor-card{
+        height: 30vh;
+    }
+    .floor-image{
+        height: 95px;
+    }
+}
 @media(max-width:1440px){
     .model-page .right-panel{
         min-height: 90vh;

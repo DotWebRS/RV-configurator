@@ -375,6 +375,21 @@
     align-items: center;
 
 }
+@media(max-width:1550px){
+    .viewer{
+
+        position:relative;
+
+        width:65vw;
+
+        height:53vh;
+
+        border-radius:14px;
+
+        overflow:hidden;
+
+    }
+}
 
 @media(max-width:1440px){
     .viewer{
