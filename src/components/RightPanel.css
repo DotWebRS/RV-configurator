@@ -3,7 +3,6 @@
     display:flex;
     flex-direction:column;
 
-    height:fit-content;
     width: 25vw;
     margin-top: 1vh;
     border-radius: 10px;
@@ -98,7 +97,7 @@
 
 .floorplan-container{
 
-    height:360px;
+    height:340px;
 
     overflow-y:auto;
 
@@ -231,7 +230,7 @@
 
 .build-summary{
 
-    margin-top:auto;
+    margin-top:20px;
 
     background:#0C2342;
 
@@ -392,6 +391,41 @@
 
     background: #74839E;
 
+}
+@media(max-width:1440px){
+    .model-page .right-panel{
+        height: 90vh !important;
+    }
+    .review-button{
+        height: 35px;
+    }
+    .send-button{
+        height: 35px;
+    }
+    .summary-header{
+        font-size: 11px;
+    }
+    .total{
+        font-size: 15px;
+    }
+    .summary-row{
+        font-size: 13px;
+    }
+    .build-summary h3{
+        font-size: 15px;
+    }
+    .floor-content p{
+        font-size: 10px;
+    }
+    .floor-content h4{
+        font-size: 15px;
+    }
+    .right-step{
+        font-size: 13px;
+    }
+    .right-title{
+        font-size: 15px;
+    }
 }
 
 @media(max-width:768px){
