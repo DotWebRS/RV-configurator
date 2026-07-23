@@ -286,7 +286,7 @@
 
 .camera-card{
 
-    width:134.4px;
+    width:120px;
 
     flex-shrink:0;
 
@@ -312,7 +312,7 @@
 
     width:100%;
 
-    height:100px;
+    height:112px;
 
     object-fit:cover;
 
@@ -402,22 +402,29 @@
         width: 90px;
         height: 130px;
     }
+    .camera-window{
+        width: 100%;
+    }
 }
 @media(max-width:768px){
 
 
 .camera-view{
 
-    width:100%;
+    width:100% !important;
 
     max-width:none;
 
 }
+.camera-window{
 
+    width:100% !important;
+
+}
 
 .camera-slider{
 
-    width:100%;
+    width:100% !important;
 
 }
 
@@ -462,7 +469,7 @@
 
 .camera-card{
 
-    width:100px;
+    width:130px !important;
 
     flex-shrink:0;
 

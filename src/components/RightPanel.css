@@ -680,21 +680,21 @@
 
     display:flex;
     flex-direction:column;
-    height: 90vh;
-    width: 25vw;
-    margin-top: 10.8px;
+    height: 900px;
+    width: 480px;
+    margin-top: 0;
     border-radius: 10px;
     background: #0A1C35;
-    padding: 19.2px;
+    padding: 20px;
 }
 
 .right-title{
 
     color:#F7F7F7;
-    padding: 5px 32px;    
+    padding: 5px 15px;    
     margin: 0px;
     font-family: var(--font-playfair);
-    font-size: clamp(22px, 3.5vw, 27px);
+    font-size: clamp(20px, 3vw, 25px);
     font-weight: 400;
     line-height: 1.2;
 
@@ -704,7 +704,7 @@
 
     margin-top:8px;
     color:#CECFD2;
-    padding: 5px 32px;
+    padding: 5px 15px;
     font-size:16px;
 
 }
@@ -722,7 +722,7 @@
     display:flex;
 
     gap:8px;
-    padding: 5px 32px;
+    padding: 5px 15px;
     width: 288px;
 
     margin-bottom:16px;
@@ -763,7 +763,7 @@
 
 .right-divider{
 
-    width:85%;
+    width:92%;
 
     height:1px;
 
@@ -771,7 +771,7 @@
 
     margin-bottom:24px;
     position: relative;
-    margin-left: 30.72px;
+    margin-left: 15px;
 
 }
 
@@ -783,11 +783,11 @@
 
     display:grid;
 
-    grid-template-columns:repeat(2,1fr);
+    grid-template-columns:200px 200px;
 
     gap:16px;
 
-    padding:20px 32px;
+    padding:20px 12px;
 
     margin-bottom:22px;
 
@@ -797,9 +797,9 @@
 
     border-radius:8px;
     transition:.25s;
-    height: 265px;
+    height: 270px;
     border: 0.75px solid  #373A41;
-    width: 192px;
+    width: 200px;
     background: transparent;
     cursor: pointer;
     padding: 0px;
@@ -817,9 +817,9 @@
 
     position:relative;
     /*-------*/
-    height:135px;
+    height:138px;
     border-radius: 8px;
-    width: 192px;
+    width: 200px;
 
 }
 
@@ -881,7 +881,7 @@
     padding: 8px 12px 8px 12px;
     font-family: var(--font-open-sans);
     font-size: 12px;
-    width: 192px;
+    width: 200px;
     height: 151.2px;
     gap: 0px;
     opacity: 1;
@@ -931,9 +931,8 @@
     flex-direction:column;
     border:1px solid #373A41;
     border-radius:8px;
-
-    padding: 16px;
-    margin: 5px 24PX;
+    padding: 15px;
+    margin: 5px 15px;
 
 }
 

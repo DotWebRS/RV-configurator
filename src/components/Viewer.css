@@ -8,9 +8,9 @@
     width:1248px;
 
     height:550px;*/
-    width:65vw;
+    width:auto;
 
-    height:60vh;
+    height:538px;
     border-radius:14px;
 
     overflow:hidden;
@@ -85,14 +85,14 @@
 
 .model-image{
 
-    width:70%;
+    width:951px;
 
-    height:70%;
+    height:376px;
 
     object-fit:contain;
     position: relative;
-    margin-top: 10vh;
-    margin-left: 10vw;
+    margin-top: 78px;
+    margin-left: 192px;
 
 }
 /* FULLSCREEN MODE */

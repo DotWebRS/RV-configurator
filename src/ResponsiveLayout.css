@@ -1,0 +1,265 @@
+/* Responsive dimensions only.  The visual styling stays in each component CSS file. */
+
+.model-page,
+.left-side,
+.right-side,
+.viewer,
+.right-panel,
+.floorplan-container,
+.floor-card,
+.floor-image,
+.floor-content,
+.right-buttons,
+.build-summary,
+.camera-view,
+.camera-window,
+.camera-card,
+.view-mode {
+    box-sizing: border-box;
+}
+
+/* Large screens expand the workspace instead of centering a fixed artboard. */
+@media (min-width: 1440px) and (max-width: 1599px) {
+    .left-side { width: auto; flex: 1 1 auto; }
+    .viewer { width: auto; }
+    .camera-view { width: auto; max-width: none; flex: 1 1 auto; }
+    .camera-window { width: auto; flex: 1 1 auto; }
+    .right-side { margin-right: 0; }
+}
+
+/* Figma reference frame: 1440 × 900 */
+@media (min-width: 1440px) {
+    .model-page { gap: 32px; padding: 20px; }
+    .right-side { width: 478px; flex: 0 0 478px; }
+    .viewer { height: 538px; }
+    .model-image { width: 613px; height: 376px; margin-top: 90px; margin-left: 144px; }
+    .viewer-bottom { gap: 40px; margin-top: 18px; }
+    .view-mode { width: 176px; }
+    .view-button { width: 140px; height: 60px; }
+    .camera-card { width: 100px; }
+    .camera-card img { height: 100px; }
+
+    .right-panel { width: 478px; height: 856px; margin-top: 0; padding: 20px; overflow: hidden; }
+    .floorplan-container { grid-template-columns: 196px 196px; gap: 16px; width: 438px; height: 340px; padding: 20px 13px; overflow-x: hidden; }
+    .floor-card { width: 196px; height: 265px; }
+    .floor-image, .floor-image img:first-child, .floor-content { width: 196px; }
+    .floor-image, .floor-image img:first-child { height: 135px; }
+}
+
+/* Original large-desktop density: 1600 × 900. */
+@media (min-width: 1600px) and (max-width: 1919px) {
+    .model-page { gap: 32px; padding: 20px; }
+    .right-side { width: 430px; flex-basis: 430px; }
+    .right-panel { width: 430px; height: 856px; }
+    .viewer { height: 538px; }
+    .model-image { width: 727px; height: 376px; margin-top: 90px; margin-left: 160px; }
+    .view-mode { width: 176px; }
+    .view-button { width: 140px; height: 60px; }
+    .camera-card { width: 100px; }
+    .camera-card img { height: 100px; }
+    .floorplan-container { grid-template-columns: 176px 176px; width: 390px; padding: 20px 11px; }
+    .floor-card { width: 176px; }
+    .floor-image, .floor-image img:first-child, .floor-content { width: 176px; }
+    .build-summary { margin: 5px 0; }
+    .right-title { padding: 5px 11px; font-size: 22px; }
+}
+
+/* Small desktop / laptop */
+@media (min-width: 1280px) and (max-width: 1439px) {
+    .model-page { gap: 32px; padding: 20px; }
+    .left-side { width: 760px; flex: 0 0 760px; }
+    .right-side { width: 430px; flex: 0 0 430px; }
+    .viewer { width: 760px; height: 470px; }
+    .model-image { width: 532px; height: 329px; margin-top: 80px; margin-left: 128px; }
+    .viewer-bottom { gap: 30px; margin-top: 16px; }
+    .view-mode { width: 162px; }
+    .view-button { width: 130px; height: 56px; }
+    .camera-view { width: 568px; max-width: 568px; }
+    .camera-window { width: 462px; flex: 0 0 462px; }
+    .camera-card { width: 92px; }
+    .camera-card img { height: 92px; }
+
+    .right-panel { width: 430px; height: 820px; margin-top: 0; padding: 20px; overflow: hidden; }
+    .floorplan-container { grid-template-columns: 176px 176px; gap: 16px; width: 390px; height: 320px; padding: 16px 11px; overflow-x: hidden; }
+    .floor-card { width: 176px; height: 240px; }
+    .floor-image, .floor-image img:first-child, .floor-content { width: 176px; }
+    .floor-image, .floor-image img:first-child { height: 118px; }
+}
+
+/* Standard 1024 px landscape tablet / compact laptop */
+@media (min-width: 1024px) and (max-width: 1279px) {
+    .model-page { gap: 24px; padding: 16px; }
+    .left-side { width: 640px; flex: 0 0 640px; }
+    .right-side { width: 344px; flex: 0 0 344px; }
+    .viewer { width: 640px; height: 420px; }
+    .model-image { width: 448px; height: 294px; margin-top: 70px; margin-left: 102px; }
+    .viewer-bottom { gap: 20px; margin-top: 14px; }
+    .view-mode { width: 150px; padding-right: 20px; }
+    .view-button { width: 120px; height: 54px; }
+    .camera-view { width: 470px; max-width: 470px; }
+    .camera-window { width: 364px; flex: 0 0 364px; }
+    .camera-card { width: 82px; }
+    .camera-card img { height: 82px; }
+
+    .right-panel { width: 344px; height: 720px; margin-top: 0; padding: 16px; overflow: hidden; }
+    .floorplan-container { grid-template-columns: 132px 132px; gap: 12px; width: 312px; height: 266px; padding: 12px 18px; overflow-x: hidden; }
+    .floor-card { width: 132px; height: 210px; }
+    .floor-image, .floor-image img:first-child, .floor-content { width: 132px; }
+    .floor-image, .floor-image img:first-child { height: 84px; }
+}
+
+/* Tablet portrait */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .model-page { flex-direction: column; align-items: center; gap: 20px; padding: 16px; }
+    .left-side, .right-side { width: 736px; flex: 0 0 736px; }
+    .viewer { width: 736px; height: 450px; }
+    .model-image { width: 515px; height: 315px; margin-top: 74px; margin-left: 112px; }
+    .viewer-bottom { flex-direction: column; gap: 18px; margin-top: 16px; }
+    .view-mode { width: 736px; padding: 0 0 18px; border-right: 0; border-bottom: 1px solid #5B5E66; }
+    .view-mode-buttons { flex-direction: row; }
+    .view-button { width: 134px; height: 56px; }
+    .camera-view { width: 736px; max-width: 736px; }
+    .camera-window { width: 630px; flex: 0 0 630px; }
+    .camera-card { width: 100px; }
+    .camera-card img { height: 100px; }
+
+    .right-panel { width: 736px; height: 760px; margin-top: 0; padding: 20px; overflow: hidden; }
+    .floorplan-container { grid-template-columns: 196px 196px; gap: 16px; width: 696px; height: 320px; padding: 16px 142px; overflow-x: hidden; }
+    .floor-card { width: 196px; height: 245px; }
+    .floor-image, .floor-image img:first-child, .floor-content { width: 196px; }
+    .floor-image, .floor-image img:first-child { height: 118px; }
+}
+
+/* Phones: fixed pixel artboards for standard widths */
+@media (min-width: 600px) and (max-width: 767px) {
+    .model-page { flex-direction: column; align-items: center; gap: 18px; padding: 16px; }
+    .left-side, .right-side { width: 568px; flex: 0 0 568px; }
+    .viewer { width: 568px; height: 380px; }
+    .model-image { width: 398px; height: 266px; margin-top: 56px; margin-left: 85px; }
+    .right-panel { width: 568px; height: 720px; margin-top: 0; padding: 16px; overflow: hidden; }
+    .floorplan-container { grid-template-columns: 176px 176px; gap: 16px; width: 536px; height: 280px; padding: 12px 84px; overflow-x: hidden; }
+    .floor-card { width: 176px; height: 225px; }
+    .floor-image, .floor-image img:first-child, .floor-content { width: 176px; }
+    .floor-image, .floor-image img:first-child { height: 108px; }
+}
+
+@media (min-width: 480px) and (max-width: 599px) {
+    .model-page { flex-direction: column; align-items: center; gap: 18px; padding: 16px; }
+    .left-side, .right-side { width: 448px; flex: 0 0 448px; }
+    .viewer { width: 448px; height: 320px; }
+    .model-image { width: 314px; height: 224px; margin-top: 42px; margin-left: 67px; }
+    .viewer-bottom { flex-direction: column; gap: 18px; }
+    .view-mode, .camera-view { width: 448px; max-width: 448px; }
+    .camera-window { width: 360px; flex: 0 0 360px; }
+    .right-panel { width: 448px; height: 710px; margin-top: 0; padding: 16px; overflow: hidden; }
+    .floorplan-container { grid-template-columns: 176px 176px; gap: 16px; width: 416px; height: 270px; padding: 12px 24px; overflow-x: hidden; }
+    .floor-card { width: 176px; height: 220px; }
+    .floor-image, .floor-image img:first-child, .floor-content { width: 176px; }
+    .floor-image, .floor-image img:first-child { height: 104px; }
+}
+
+@media (min-width: 360px) and (max-width: 479px) {
+    .model-page { flex-direction: column; align-items: center; gap: 16px; padding: 16px; }
+    .left-side, .right-side { width: 328px; flex: 0 0 328px; }
+    .viewer { width: 328px; height: 280px; }
+    .model-image { width: 230px; height: 196px; margin-top: 34px; margin-left: 49px; }
+    .viewer-bottom { flex-direction: column; gap: 16px; }
+    .view-mode, .camera-view { width: 328px; max-width: 328px; }
+    .camera-window { width: 328px; flex: 0 0 328px; }
+    .camera-arrow { display: none; }
+    .right-panel { width: 328px; height: 660px; margin-top: 0; padding: 14px; overflow: hidden; }
+    .right-title { font-size: 16px; line-height: 20px; white-space: nowrap; }
+    .floorplan-container { grid-template-columns: 300px; justify-content: center; width: 300px; height: 238px; padding: 10px 0; overflow-x: hidden; }
+    .floor-card { width: 300px; height: 214px; }
+    .floor-image, .floor-image img:first-child, .floor-content { width: 300px; }
+    .floor-image, .floor-image img:first-child { height: 102px; }
+    .floor-content { height: 112px; padding: 8px 12px; }
+    .floor-content h4 { font-size: 13px; line-height: 17px; margin-top: 4px; margin-bottom: 3px; }
+    .floor-content p, .floor-content p[style] { font-size: 10px !important; line-height: 14px !important; }
+    .build-summary { padding: 10px; margin: 5px 0; }
+    .build-summary h3 { margin-bottom: 8px; font-size: 14px; }
+    .summary-row { margin-bottom: 3px; font-size: 11px; }
+    .total { font-size: 13px; }
+    .summary-header { margin-bottom: 8px; font-size: 10px; }
+    .review-button, .send-button { height: 32px; font-size: 11px; }
+}
+
+@media (max-width: 359px) {
+    .model-page { flex-direction: column; align-items: center; gap: 14px; padding: 16px; }
+    .left-side, .right-side { width: 288px; flex: 0 0 288px; }
+    .viewer { width: 288px; height: 250px; }
+    .model-image { width: 202px; height: 175px; margin-top: 28px; margin-left: 43px; }
+    .viewer-bottom { flex-direction: column; gap: 14px; }
+    .view-mode, .camera-view { width: 288px; max-width: 288px; }
+    .camera-window { width: 288px; flex: 0 0 288px; }
+    .camera-arrow { display: none; }
+    .right-panel { width: 288px; height: 630px; margin-top: 0; padding: 12px; overflow: hidden; }
+    .right-title { font-size: 14px; line-height: 18px; white-space: nowrap; }
+    .floorplan-container { grid-template-columns: 264px; justify-content: center; width: 264px; height: 222px; padding: 8px 0; overflow-x: hidden; }
+    .floor-card { width: 264px; height: 202px; }
+    .floor-image, .floor-image img:first-child, .floor-content { width: 264px; }
+    .floor-image, .floor-image img:first-child { height: 96px; }
+    .floor-content { height: 106px; padding: 7px 10px; }
+    .floor-content h4 { font-size: 12px; line-height: 16px; margin-top: 3px; margin-bottom: 2px; }
+    .floor-content p, .floor-content p[style] { font-size: 9px !important; line-height: 13px !important; }
+    .build-summary { padding: 8px; margin: 4px 0; }
+    .build-summary h3 { margin-bottom: 6px; font-size: 13px; }
+    .summary-row { margin-bottom: 2px; font-size: 10px; }
+    .total { font-size: 12px; }
+    .summary-header { margin-bottom: 6px; font-size: 9px; }
+    .review-button, .send-button { height: 30px; font-size: 10px; }
+}
+
+/* 430 px phone artboard: use the available width instead of the 360 px layout. */
+@media (min-width: 400px) and (max-width: 479px) {
+    .left-side, .right-side { width: 398px; flex-basis: 398px; }
+    .viewer { width: 398px; height: 300px; }
+    .model-image { width: 279px; height: 210px; margin-top: 38px; margin-left: 60px; }
+    .view-mode, .camera-view { width: 398px; max-width: 398px; }
+    .camera-window { width: 398px; flex-basis: 398px; }
+    .right-panel { width: 398px; height: 670px; }
+    .floorplan-container { grid-template-columns: 358px; width: 370px; height: 246px; padding: 10px 6px; }
+    .floor-card { width: 358px; height: 220px; }
+    .floor-image, .floor-image img:first-child, .floor-content { width: 358px; }
+    .floor-image, .floor-image img:first-child { height: 104px; }
+}
+
+@media (min-width: 1440px) and (max-width: 1599px) {
+    .right-title { font-size: 21px; }
+}
+
+/* Height-only overrides: compact screens retain the same widths. */
+@media (max-height: 799px) and (min-width: 1024px) {
+    .viewer { height: 440px; }
+    .model-image { margin-top: 66px; }
+    .right-panel { height: 740px; }
+    .floorplan-container { height: 280px; }
+}
+
+@media (max-height: 699px) and (min-width: 1024px) {
+    .viewer { height: 390px; }
+    .model-image { height: 270px; margin-top: 52px; }
+    .right-panel { height: 660px; }
+    .floorplan-container { height: 220px; }
+}
+
+/* Final guard for wide desktop layouts: no child may push the right column off-screen. */
+@media (min-width: 1440px) {
+    html, body, #root { width: 100%; max-width: 100%; overflow-x: hidden; }
+    .model-page {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 480px;
+        width: 100%;
+        min-width: 0;
+    }
+    .left-side, .right-side, .viewer-bottom, .camera-view, .camera-slider, .camera-window { min-width: 0; }
+    .left-side { width: auto; }
+    .right-side { width: 480px; margin: 0; }
+    .viewer { width: auto; max-width: none; }
+    .camera-view, .camera-window { width: auto; max-width: none; }
+}
+
+@media (min-width: 1600px) and (max-width: 1919px) {
+    .model-page { grid-template-columns: minmax(0, 1fr) 430px; }
+    .right-side { width: 430px; }
+}

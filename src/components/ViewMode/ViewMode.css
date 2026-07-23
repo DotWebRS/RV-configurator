@@ -1,6 +1,6 @@
 /*.view-mode{
 
-    width:10vw;
+    width:192px;
 
     display:flex;
     flex-direction:column;
@@ -169,9 +169,9 @@
 
 .view-button{
 
-    width:153.6px;
+    width:154px;
 
-    height:64.8px;
+    height:64px;
 
     display:flex;
 

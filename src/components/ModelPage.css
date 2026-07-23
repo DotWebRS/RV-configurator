@@ -11,9 +11,9 @@
 
     display:flex;
 
-    gap:30px;
+    gap:40px;
 
-    padding:16px;
+    padding:32px;
 
 }
 
@@ -84,7 +84,7 @@ body{
 
 .model-page{
 
-    min-height:100%;
+    height:100%;
 
     display:flex;
 
@@ -102,8 +102,8 @@ body{
 
 .right-side{
 
-    width:25vw;
-    margin-right:57.6px;
+    width:480px;
+    margin-right:0;
 
 }
 .viewer-bottom{
