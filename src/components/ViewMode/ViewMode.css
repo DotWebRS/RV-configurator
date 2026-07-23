@@ -132,7 +132,7 @@
 
 .view-mode{
 
-    width:192px;
+    width:10vw;
 
     display:flex;
     flex-direction:column;
@@ -221,11 +221,11 @@
 
 }
 @media(max-width:1600px){
-    .view-mode{
+    /*.view-mode{
 
         width:150px;
 
-    }
+    }*/
     .view-button{
 
         width:140px;
@@ -234,11 +234,11 @@
     }
 }
 @media(max-width:1440px){
-    .view-mode{
+    /*.view-mode{
 
         height: 175px;
 
-    }
+    }*/
     .view-button{
 
         width:130px;
@@ -246,11 +246,11 @@
     }
 }
 @media(max-width:1024px){
-    .view-mode{
+    /*.view-mode{
 
         height: 180px;
 
-    }
+    }*/
     .view-button{
 
         width:130px;

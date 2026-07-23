@@ -102,7 +102,7 @@ body{
 
 .right-side{
 
-    width:480px;
+    width:25vw;
     margin-right:57.6px;
 
 }
@@ -112,7 +112,7 @@ body{
     margin-top:10px;
     align-items:flex-start;
 }
-@media (max-width: 1600px){
+/*@media (max-width: 1600px){
 
 
     .left-side{
@@ -131,7 +131,7 @@ body{
 
 
 }
-@media(max-width:1024px){
+/*@media(max-width:1024px){
     .left-side{
 
         width: 600px;
@@ -142,7 +142,7 @@ body{
         width: 300px;
 
     }
-}
+}*/
 
 @media (max-width: 768px){
 

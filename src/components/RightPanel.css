@@ -680,8 +680,8 @@
 
     display:flex;
     flex-direction:column;
-    height: 820px;
-    width: 480px;
+    height: 90vh;
+    width: 25vw;
     margin-top: 10.8px;
     border-radius: 10px;
     background: #0A1C35;
@@ -1089,9 +1089,9 @@
 
 @media(max-width:1600px){
 
-    .right-panel{
+    /*.right-panel{
         height: 810px;
-    }
+    }*/
 
     .right-title{
         padding: 5px 20px;
@@ -1159,10 +1159,10 @@
 
 @media(max-width:1440px){
 
-    .model-page .right-panel{
+    /*.model-page .right-panel{
         min-height: 810px;
         width: 430px;
-    }
+    }*/
 
     .right-buttons{
         padding: 5px;
@@ -1232,12 +1232,12 @@
     }
 
 }
-@media(max-width:1024px){
+/*@media(max-width:1024px){
     .model-page .right-panel{
         width: 310px;
         max-height: 500px;
     }
-}
+}*/
 
 @media(max-width:768px){
 

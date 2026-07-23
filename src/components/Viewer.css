@@ -4,11 +4,13 @@
 
     /*width:65vw;
 
-    height:60vh;*/
+    height:60vh;
     width:1248px;
 
-    height:550px;
+    height:550px;*/
+    width:65vw;
 
+    height:60vh;
     border-radius:14px;
 
     overflow:hidden;
@@ -418,10 +420,10 @@
 
         /*width:65vw;
 
-        height:53vh;*/
+        height:53vh;
         width:950px;
 
-        height:540px;
+        height:540px;*/
 
         border-radius:14px;
 
@@ -437,10 +439,10 @@
 
         /*width:65vw;
 
-        height:52vh;*/
+        height:52vh;
         width:900px;
 
-        height:540px;
+        height:540px;*/
 
         border-radius:14px;
 
@@ -448,12 +450,12 @@
 
     }
 }
-@media(max-width:1024px){
+/*@media(max-width:1024px){
     .viewer{
         width: 600px;
         height: 450px;
     }
-}
+}*/
 @media(max-width:768px){
 
 
