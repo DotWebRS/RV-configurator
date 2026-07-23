@@ -53,14 +53,14 @@ const RightPanel = () => {
 
             <p className="right-step">
 
-                <strong>Step 1:</strong> Select the Floor Plan
+                <strong>Step 1:</strong> select the Floor Plan
 
             </p>
 
             <div className="right-buttons">
 
                 <button
-                    className="step-button"
+                    className="step-button unclickable"
                     onClick={() => console.log("Kliknuo sam na previous")}
                 >
 
@@ -69,7 +69,7 @@ const RightPanel = () => {
                 </button>
 
                 <button
-                    className="step-button"
+                    className="step-button clickable"
                     onClick={() => console.log("Kliknuo sam na next!")}
                 >
 
@@ -129,15 +129,15 @@ const RightPanel = () => {
 
                                 <h4>{plan.name}</h4>
 
-                                <p>Height: {plan.height} &nbsp; / &nbsp; Length: {plan.length}</p>
+                                <p style={{ fontSize: '12px' }}>Height: {plan.height} &nbsp; / &nbsp; Length: {plan.length}</p>
 
-                                <p>Width: {plan.width} &nbsp; / &nbsp; GVWR: {plan.gvwr}</p>
+                                <p style={{ fontSize: '12px' }}>Width: {plan.width} &nbsp; / &nbsp; GVWR: {plan.gvwr}</p>
 
-                                <p>Grey Water: {plan.grey}</p>
+                                <p style={{ fontSize: '12px' }}>Grey Water: {plan.grey}</p>
 
-                                <p>Black Water: {plan.black}</p>
+                                <p style={{ fontSize: '12px' }}>Black Water: {plan.black}</p>
 
-                                <p>Fresh Water: {plan.fresh}</p>
+                                <p style={{ fontSize: '12px' }}>Fresh Water: {plan.fresh}</p>
 
                             </div>
 

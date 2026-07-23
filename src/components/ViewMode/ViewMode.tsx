@@ -26,7 +26,7 @@ const ViewMode = () => {
         <div className="view-mode">
 
             <p className="view-mode-title">
-                View Mode
+                Model View
             </p>
 
             <div className="view-mode-buttons">

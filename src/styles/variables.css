@@ -22,13 +22,25 @@
   --radius-small: 6px;
   --radius-medium: 10px;
   --radius-large: 14px;
+  --navy:   #0C2342;
+  --slate:  #425B7D;
+  --silver: #CBCBCB;
 
+  /* Typography — bundled locally via @fontsource (no Google fetch at build) */
+  --font-playfair:  'Playfair Display', Georgia, serif;
+  --font-montserrat: 'Montserrat', system-ui, sans-serif;
+  --font-open-sans:  'Open Sans', system-ui, sans-serif;
+  /* Configurator UI tokens */
+  --gold:   #C9A24A;
+  --ink:    #1c1c1a;
+  --panel:  #fcfbf7;
+  --muted:  #888780;
 }
 
 html,
 body,
 #root {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-open-sans);
 }
 
 button,

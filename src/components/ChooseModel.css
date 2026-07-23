@@ -1,7 +1,13 @@
 .choose-model{
 
     display:flex;
-    flex-direction:column;
+    flex-direction:column;    
+    font-family: var(--font-open-sans);
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 28px;
+    letter-spacing: 0%;
+    
 
 }
 
@@ -27,7 +33,8 @@
     background: #071528;
     border: 0.1px solid #22262f;
     border-radius: 12px;
-    margin-bottom: 2vh;
+    margin-bottom: 21.6px;
+
 }
 
 .tab{
@@ -45,6 +52,11 @@
 
     cursor: pointer;
     transition: 0.3s;
+    font-family: var(--font-open-sans);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0%;
 }
 
 .tab:hover{
