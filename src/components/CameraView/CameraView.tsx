@@ -1,5 +1,6 @@
+"use client";
+
 import { useState, useRef } from "react";
-import "./CameraView.css";
 import { cameraViews } from "../data";
 
 

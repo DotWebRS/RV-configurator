@@ -1,5 +1,6 @@
+"use client";
+
 import { useState, useRef, useEffect } from "react";
-import "./Viewer.css";
 
 const Viewer = () => {
 

@@ -1,4 +1,3 @@
-import "./ModelPage.css";
 import RightPanel from "./RightPanel";
 import ChooseModel from "./ChooseModel";
 import Viewer from "./Viewer";

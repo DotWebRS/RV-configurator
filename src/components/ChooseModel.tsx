@@ -1,5 +1,6 @@
+"use client";
+
 import { useState } from "react";
-import "./ChooseModel.css";
 import { models } from "./data";
 
 const ChooseModel = () => {

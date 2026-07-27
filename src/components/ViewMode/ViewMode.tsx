@@ -1,5 +1,6 @@
+"use client";
+
 import { useState } from "react";
-import "./ViewMode.css";
 
 const viewModes = [
     {
