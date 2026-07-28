@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Experience from '../three/Experience/Experience';
 
 const Viewer = () => {
 
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [cursorMode, setCursorMode] = useState("arrow");
     const scrollPosition = useRef(0);
-
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const experienceRef = useRef<any>(null);
     const toggleFullscreen = () => {
         setIsFullscreen(!isFullscreen);
 
@@ -25,11 +27,20 @@ const Viewer = () => {
             document.querySelector(".fullscreen-background")?.classList.add("not-visible");
             window.scrollTo(0, scrollPosition.current);
         }
+        experienceRef.current?.sizes.canvasResized();
+    }, [isFullscreen]);
+
+    useEffect(() => {
+        if (!canvasRef.current) return;
+
+        experienceRef.current = new Experience(canvasRef.current);
 
         return () => {
             document.body.style.overflow = "auto";
+            experienceRef.current?.destroy();
+            experienceRef.current = null;
         };
-    }, [isFullscreen]);
+    }, []);
 
     return (
         <>
@@ -80,7 +91,7 @@ const Viewer = () => {
                 <span className="view-text">VIEW</span>
             </div>
 
-            <img
+            {/* <img
 
                 src="/images/model-image.png"
 
@@ -88,7 +99,8 @@ const Viewer = () => {
 
                 className="model-image"
 
-            />
+            />*/}
+            <canvas ref={canvasRef}></canvas>
 
             {/* DONJI LEVI KONTROLER */}
             <div className="cursor-controls">
