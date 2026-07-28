@@ -18,24 +18,41 @@ export default class Renderer{
         this.instance = new THREE.WebGLRenderer({
             canvas: this.canvas,
             antialias: true,
-            alpha: true
+            alpha: true,
+            powerPreference: "high-performance"
         })
-        this.instance.physicallyCorrectLights = true;
-        this.instance.outputEncoding = THREE.SRGBColorSpace;
-        this.instance.toneMapping = THREE.CineonToneMapping;
-        this.instance.toneMappingExposure = 1.75;
+        this.instance.outputColorSpace = THREE.SRGBColorSpace;
+        this.instance.toneMapping = THREE.ACESFilmicToneMapping;
+        this.instance.toneMappingExposure = 1.0;
         this.instance.shadowMap.enabled = true;
-        this.instance.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.instance.shadowMap.type = THREE.PCFShadowMap;
         this.instance.setSize(this.sizes.width, this.sizes.height);
-        this.instance.setPixelRatio(this.sizes.pixelRatio);
+        this.instance.setPixelRatio(Math.min(this.sizes.pixelRatio, 2));
     }
 
     resize(){
         this.instance.setSize(this.sizes.width, this.sizes.height);
-        this.instance.setPixelRatio(this.sizes.pixelRatio);
+        this.instance.setPixelRatio(Math.min(this.sizes.pixelRatio, 2));
     }
 
     update(){
         this.instance.render(this.scene, this.camera.instance);
+    }
+
+    destroy({ loseContext = true } = {}){
+        if(!this.instance) return;
+
+        this.instance.setAnimationLoop(null);
+        this.instance.renderLists.dispose();
+        this.instance.dispose();
+
+        if(loseContext){
+            this.instance.forceContextLoss();
+        }
+
+        this.instance = null;
+        this.scene = null;
+        this.camera = null;
+        this.canvas = null;
     }
 }

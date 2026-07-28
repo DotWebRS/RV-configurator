@@ -1,24 +1,28 @@
-
 {
   "name": "rv-configurator",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "dat.gui": "^0.7.9",
     "next": "^15.5.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "dat.gui": "^0.7.9",
     "three": "^0.184.0"
   },
   "devDependencies": {
+    "@gltf-transform/core": "^4.4.2",
+    "@gltf-transform/extensions": "^4.4.2",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
+    "draco3dgltf": "^1.5.7",
+    "sharp": "^0.35.3",
     "typescript": "^5.9.3"
   },
   "scripts": {
     "dev": "next dev",
     "start": "next start",
-    "build": "next build"
+    "build": "next build",
+    "optimize-models": "node scripts/optimize-models.mjs"
   }
 }

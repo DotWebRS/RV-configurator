@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Experience from '../three/Experience/Experience';
+import {
+    useExperienceRef,
+    type ExperienceInstance,
+} from "../three/ExperienceContext";
 
 const Viewer = () => {
 
@@ -9,7 +12,7 @@ const Viewer = () => {
     const [cursorMode, setCursorMode] = useState("arrow");
     const scrollPosition = useRef(0);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const experienceRef = useRef<any>(null);
+    const experienceRef = useExperienceRef();
     const toggleFullscreen = () => {
         setIsFullscreen(!isFullscreen);
 
@@ -33,9 +36,27 @@ const Viewer = () => {
     useEffect(() => {
         if (!canvasRef.current) return;
 
-        experienceRef.current = new Experience(canvasRef.current);
+        let cancelled = false;
+
+        const createExperience = async () => {
+            const { default: Experience } = await import('../three/Experience/Experience');
+
+            if (cancelled || !canvasRef.current) return;
+
+            const experience = new Experience(canvasRef.current);
+
+            if (cancelled) {
+                experience.destroy();
+                return;
+            }
+
+            experienceRef.current = experience as ExperienceInstance;
+        };
+
+        createExperience();
 
         return () => {
+            cancelled = true;
             document.body.style.overflow = "auto";
             experienceRef.current?.destroy();
             experienceRef.current = null;

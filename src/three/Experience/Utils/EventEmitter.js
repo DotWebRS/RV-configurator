@@ -45,7 +45,7 @@ export default class EventEmitter
         return this
     }
 
-    off(_names)
+    off(_names, callback)
     {
         // Errors
         if(typeof _names === 'undefined' || _names === '')
@@ -80,7 +80,18 @@ export default class EventEmitter
                     {
                         if(this.callbacks[ namespace ] instanceof Object && this.callbacks[ namespace ][ name.value ] instanceof Array)
                         {
-                            delete this.callbacks[ namespace ][ name.value ]
+                            if(callback)
+                            {
+                                this.callbacks[ namespace ][ name.value ] = this.callbacks[ namespace ][ name.value ].filter(
+                                    (registeredCallback) => registeredCallback !== callback
+                                )
+                                if(this.callbacks[ namespace ][ name.value ].length === 0)
+                                    delete this.callbacks[ namespace ][ name.value ]
+                            }
+                            else
+                            {
+                                delete this.callbacks[ namespace ][ name.value ]
+                            }
 
                             // Remove namespace if empty
                             if(Object.keys(this.callbacks[ namespace ]).length === 0)
@@ -92,7 +103,18 @@ export default class EventEmitter
                 // Specified namespace
                 else if(this.callbacks[ name.namespace ] instanceof Object && this.callbacks[ name.namespace ][ name.value ] instanceof Array)
                 {
-                    delete this.callbacks[ name.namespace ][ name.value ]
+                    if(callback)
+                    {
+                        this.callbacks[ name.namespace ][ name.value ] = this.callbacks[ name.namespace ][ name.value ].filter(
+                            (registeredCallback) => registeredCallback !== callback
+                        )
+                        if(this.callbacks[ name.namespace ][ name.value ].length === 0)
+                            delete this.callbacks[ name.namespace ][ name.value ]
+                    }
+                    else
+                    {
+                        delete this.callbacks[ name.namespace ][ name.value ]
+                    }
 
                     // Remove namespace if empty
                     if(Object.keys(this.callbacks[ name.namespace ]).length === 0)
@@ -102,6 +124,11 @@ export default class EventEmitter
         })
 
         return this
+    }
+
+    destroy()
+    {
+        this.callbacks = { base: {} }
     }
 
     trigger(_name, _args)

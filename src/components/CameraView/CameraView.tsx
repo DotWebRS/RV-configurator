@@ -2,20 +2,27 @@
 
 import { useState, useRef } from "react";
 import { cameraViews } from "../data";
+import { useExperienceRef } from "../../three/ExperienceContext";
 
 
 const CameraView = () => {
 
     const [selectedView, setSelectedView] = useState<string | null>(null);
     const sliderRef = useRef<HTMLDivElement>(null);
-    
+    const experienceRef = useExperienceRef();
 
 
     const handleCardClick = (view: string) => {
+        const experience = experienceRef.current;
+
+        if (!experience) {
+            console.warn("Experience još nije inicijalizovan.");
+            return;
+        }
 
         setSelectedView(view);
-
-        console.log(`Kliknuo sam na ${view} View`);
+        console.log(view.split(" ")[0].toLowerCase());
+        experience.updateCameraView(view.split(" ")[0].toLowerCase());
 
     };
 

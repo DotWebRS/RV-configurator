@@ -6,4 +6,10 @@ export default class Debug{
             this.ui = new GUI();
         }
     }
+
+    destroy(){
+        this.ui?.destroy();
+        this.ui = null;
+        this.active = false;
+    }
 }

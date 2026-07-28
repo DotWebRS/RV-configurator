@@ -11,5 +11,5 @@ export const cameraViews = [
     "Left View",
     "Right View",
     "Top View",
-    "Down View",
+    "Bottom View",
 ];

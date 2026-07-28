@@ -33,4 +33,16 @@ export default class Cube{
             this.mesh.rotation.z += 0.01;
         }
     }
+
+    destroy(){
+        this.mesh?.removeFromParent();
+        this.geometry?.dispose();
+        this.material?.dispose();
+
+        this.mesh = null;
+        this.geometry = null;
+        this.material = null;
+        this.scene = null;
+        this.resources = null;
+    }
 }

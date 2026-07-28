@@ -1,23 +1,32 @@
 import EventEmitter from "./EventEmitter.js";
-import Experience from "../Experience.js";
 export default class Sizes extends EventEmitter{
-    constructor(){
+    constructor(canvas){
         super();
-        this.Experience = new Experience();
-        this.canvas = this.Experience.canvas;
+        this.canvas = canvas;
+        this.destroyed = false;
         this.width = this.canvas.parentElement.offsetWidth;
         this.height = this.canvas.parentElement.offsetHeight;
-        this.pixelRatio = Math.min(window.devicePixelRatio, 2);        
+        this.pixelRatio = Math.min(window.devicePixelRatio, 2);
 
-        window.addEventListener('resize', ()=>{
-            canvasResized();
-        });
+        this.onResize = this.canvasResized.bind(this);
+        window.addEventListener('resize', this.onResize);
     }
     canvasResized(){
+        if(this.destroyed || !this.canvas?.parentElement) return;
+
         this.width = this.canvas.parentElement.offsetWidth;
         this.height = this.canvas.parentElement.offsetHeight;
         this.pixelRatio = Math.min(window.devicePixelRatio, 2);
 
         this.trigger("resize");
+    }
+
+    destroy(){
+        if(this.destroyed) return;
+
+        this.destroyed = true;
+        window.removeEventListener('resize', this.onResize);
+        super.destroy();
+        this.canvas = null;
     }
 }

@@ -1,31 +1,36 @@
+"use client";
+
 import RightPanel from "./RightPanel";
 import ChooseModel from "./ChooseModel";
 import Viewer from "./Viewer";
 import ViewMode from "./ViewMode/ViewMode";
 import CameraView from "./CameraView/CameraView";
+import { ExperienceProvider } from "../three/ExperienceContext";
 
 const ModelPage = () => {
 
     return (
 
-        <div className="model-page">
+        <ExperienceProvider>
+            <div className="model-page">
 
-            <div className="left-side">
+                <div className="left-side">
 
-                <ChooseModel/>
+                    <ChooseModel/>
 
-                <Viewer/>
-                <div className="viewer-bottom">
-                    <ViewMode />
-                    <CameraView />
+                    <Viewer/>
+                    <div className="viewer-bottom">
+                        <ViewMode />
+                        <CameraView />
+                    </div>
                 </div>
-            </div>
 
-            <div className="right-side">
-                <RightPanel/>
-            </div>
+                <div className="right-side">
+                    <RightPanel/>
+                </div>
 
-        </div>
+            </div>
+        </ExperienceProvider>
 
     );
 

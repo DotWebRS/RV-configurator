@@ -7,6 +7,7 @@ import World from './World/World.js';
 import Resources from './Utils/Resources.js';
 import Debug from './Utils/Debug.js';
 import sources from "./sources.js";
+import { disposeObject3D } from "./Utils/dispose.js";
 let instance = null;
 
 export default class Experience{
@@ -15,63 +16,97 @@ export default class Experience{
             return instance;
         }
         instance = this;
+        this.destroyed = false;
+        this.sources = sources;
         //Global access
         window.experience = this;
 
         this.canvas = canvas;
         this.debug = new Debug();
-        this.sizes = new Sizes();
+        this.sizes = new Sizes(this.canvas);
         this.time = new Time();
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x000000);
-        this.resources = new Resources(sources);
+        this.scene.background = null;
+        this.resources = new Resources(this.sources);
         this.camera = new Camera();
         this.renderer = new Renderer();
         this.world = new World();
 
-        this.sizes.on('resize', ()=>{
+        this.onResize = ()=>{
             this.resize();
-        })
+        };
+        this.sizes.on('resize', this.onResize);
 
-        this.time.on('tick', ()=>{
+        this.onTick = ()=>{
             this.update();
-        });
+        };
+        this.time.on('tick', this.onTick);
     }
 
+    updateCameraView(view){
+        this.camera.updateCameraView(view);
+    }
     resize(){
         this.camera.resize();
         this.renderer.resize();
     }
 
     update(){
+        if(this.destroyed) return;
+
         this.camera.update();
         this.world.update();
         this.renderer.update();
     }
 
+    unloadWorld(){
+        this.world?.destroy();
+        this.resources?.destroy();
+        this.world = null;
+        this.resources = null;
+    }
+
+    reloadWorld(nextSources = this.sources){
+        if(this.destroyed) return;
+
+        this.unloadWorld();
+        this.sources = nextSources;
+        this.resources = new Resources(this.sources);
+        this.world = new World();
+    }
+
     destroy(){
-        this.sizes.off('resize');
-        this.sizes.off('tick');
+        if(this.destroyed) return;
 
-        this.scene.traverse((child)=>{
-            if(child.isMesh){
-                child.geometry.dispose();
-                for(const key in child.material){
-                    const value = child.material[key];
-                    if(value && typeof value.dispose === 'function'){
-                        value.dispose();
-                    }
-                }
-            }
+        this.destroyed = true;
 
-        })
+        this.time?.off('tick', this.onTick);
+        this.sizes?.off('resize', this.onResize);
+        this.time?.destroy();
+        this.sizes?.destroy();
 
-        this.camera.controls.dispose();
-        
-        this.renderer.dispose();
+        this.unloadWorld();
+        this.camera?.destroy();
 
-        if(this.debug.active){
-            this.debug.ui.destroy();
+        disposeObject3D(this.scene, { disposeTextures: true, removeFromParent: false });
+        this.renderer?.destroy({ loseContext: true });
+        this.debug?.destroy();
+
+        if(window.experience === this){
+            delete window.experience;
         }
+        if(instance === this){
+            instance = null;
+        }
+
+        this.canvas = null;
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.debug = null;
+        this.sizes = null;
+        this.time = null;
+        this.onResize = null;
+        this.onTick = null;
     }
 }
