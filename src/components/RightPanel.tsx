@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useExperienceRef } from "../three/ExperienceContext";
 
 const floorPlans = [
     {
         id: 1,
-        name: "33EFS",
+        name: "48FLB",
         height: "13'5\"",
         length: "33'",
         width: "8'6\"",
@@ -13,10 +14,11 @@ const floorPlans = [
         grey: "40 gal",
         black: "40 gal",
         fresh: "75 gal",
+        modelPath: "threejs-assets/regent/models/48FLB/Regent Hauler Flyer_48FLB_(10707)_V7-optimized-2k.glb"
     },
     {
         id: 2,
-        name: "33EFS",
+        name: "49RH",
         height: "13'5\"",
         length: "33'",
         width: "8'6\"",
@@ -24,8 +26,9 @@ const floorPlans = [
         grey: "40 gal",
         black: "40 gal",
         fresh: "75 gal",
+        modelPath: "threejs-assets/regent/models/49RH/Regent Hauler Flyer_49RH_F10-optimized-2k.glb"
     },
-    {
+    /*{
         id: 3,
         name: "35G",
         height: "13'5\"",
@@ -35,12 +38,27 @@ const floorPlans = [
         grey: "60 gal",
         black: "40 gal",
         fresh: "100 gal",
-    }
+    }*/
 ];
 
 const RightPanel = () => {
 
     const [selectedCard, setSelectedCard] = useState(1);
+    const experienceRef = useExperienceRef();
+
+    const handleCardClick = (plan: (typeof floorPlans)[number]) => {
+        if (selectedCard === plan.id) return;
+
+        const experience = experienceRef.current;
+
+        if (!experience) {
+            console.warn("Experience još nije inicijalizovan.");
+            return;
+        }
+
+        experience.changeRV(plan.modelPath);
+        setSelectedCard(plan.id);
+    };
 
     return (
 
@@ -89,7 +107,7 @@ const RightPanel = () => {
                         <div
                             key={plan.id}
                             className={`floor-card ${selectedCard === plan.id ? "active" : ""}`}
-                            onClick={() => setSelectedCard(plan.id)}
+                            onClick={() => handleCardClick(plan)}
                         >
 
                             <div className="floor-image">

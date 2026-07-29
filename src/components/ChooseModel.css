@@ -65,6 +65,18 @@
 
 }
 
+.tab:disabled {
+
+    cursor: not-allowed;
+
+}
+
+.tab:disabled:hover {
+
+    color: #94979C;
+
+}
+
 .tab.active {
     background: #264064;
     color: #CECFD2;

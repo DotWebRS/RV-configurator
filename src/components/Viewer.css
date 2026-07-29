@@ -255,6 +255,33 @@
 
 }
 
+.zoom-input {
+
+    width: 28px;
+    padding: 0;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+    color: white;
+
+    font: inherit;
+    text-align: right;
+
+    appearance: textfield;
+    -moz-appearance: textfield;
+
+}
+
+.zoom-input::-webkit-inner-spin-button,
+.zoom-input::-webkit-outer-spin-button {
+
+    margin: 0;
+    -webkit-appearance: none;
+
+}
+
 /* Jedan border između elemenata */
 
 .zoom-btn:first-child,

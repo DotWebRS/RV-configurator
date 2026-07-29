@@ -46,6 +46,15 @@ export default class Experience{
     updateCameraView(view){
         this.camera.updateCameraView(view);
     }
+    setZoomPercent(percent){
+        this.camera.setZoomPercent(percent);
+    }
+    getZoomPercent(){
+        return this.camera.getZoomPercent();
+    }
+    onZoomChange(callback){
+        return this.camera.onZoomChange(callback);
+    }
     resize(){
         this.camera.resize();
         this.renderer.resize();
@@ -57,6 +66,10 @@ export default class Experience{
         this.camera.update();
         this.world.update();
         this.renderer.update();
+    }
+    
+    changeRV(modelPath){
+        this.world.changeRV(modelPath);
     }
 
     unloadWorld(){

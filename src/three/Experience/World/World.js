@@ -20,6 +20,10 @@ export default class World{
     update(){
         
     }
+    changeRV(modelPath){
+        this.rv?.destroy();
+        this.rv = new RV(modelPath);
+    }
 
     destroy(){
         if(this.destroyed) return;

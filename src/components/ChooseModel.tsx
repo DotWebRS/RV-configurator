@@ -5,7 +5,7 @@ import { models } from "./data";
 
 const ChooseModel = () => {
 
-    const [activeModel, setActiveModel] = useState(0);
+    const [activeModel, setActiveModel] = useState(4);
 
     const handleClick = (index: number) => {
 
@@ -32,6 +32,7 @@ const ChooseModel = () => {
                         <button
 
                             key={model}
+                            disabled={model !== "Luxe Regent"}
 
                             className={
                                 index === activeModel

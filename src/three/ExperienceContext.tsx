@@ -13,6 +13,10 @@ export type ExperienceInstance = {
     unloadWorld: () => void;
     reloadWorld: (sources?: unknown[]) => void;
     updateCameraView: (view: string) => void;
+    setZoomPercent: (percent: number) => void;
+    getZoomPercent: () => number;
+    onZoomChange: (callback: (percent: number) => void) => () => void;
+    changeRV: (modelPath: string) => void;
     sizes: {
         canvasResized: () => void;
     };

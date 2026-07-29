@@ -5,13 +5,23 @@ import Experience from "./Experience.js";
 export default class Camera{
     constructor(){
         this.experience = new Experience();
-        document.body.addEventListener("click", () => {
+        this.onDebugClick = () => {
             console.log(this.instance.position);
             console.log(this.controls.target);
-        })
+            console.log(this.instance);
+            console.log(this.controls);
+        };
+        document.body.addEventListener("click", this.onDebugClick);
         this.sizes = this.experience.sizes;
         this.scene = this.experience.scene;
         this.canvas = this.experience.canvas;
+        this.zoomSettings = {
+            minDistance: new THREE.Vector3(-12, 0.8, 6)
+                .distanceTo(new THREE.Vector3(0.5, 2.25, 1.26)),
+
+            maxDistance: new THREE.Vector3(-36, -2, 15)
+                .distanceTo(new THREE.Vector3(0.5, 2.25, 1.26))
+        };
         this.positions = {
             "top" : {
                 "camera" : new THREE.Vector3(0.5, 15.7, 1.26),
@@ -53,6 +63,8 @@ export default class Camera{
         this.controls.target.set(this.positions.right.target.x, this.positions.right.target.y, this.positions.right.target.z);
         this.controls.enablePan = false;
         this.controls.enableDamping = true;
+        this.controls.minDistance = this.zoomSettings.minDistance;
+        this.controls.maxDistance = this.zoomSettings.maxDistance;
     }
     resize(){
         this.instance.aspect = this.sizes.width / this.sizes.height;
@@ -73,13 +85,84 @@ export default class Camera{
         }
         this.controls.update();
     }
+    setZoomPercent(percent) {
+        if (!this.instance || !this.controls) {
+            return;
+        }
+
+        const clampedPercent = THREE.MathUtils.clamp(percent, 0, 100);
+        const normalizedPercent = clampedPercent / 100;
+
+        const { minDistance, maxDistance } = this.zoomSettings;
+
+        const newDistance = THREE.MathUtils.lerp(
+            maxDistance,
+            minDistance,
+            normalizedPercent
+        );
+
+        const direction = new THREE.Vector3()
+            .subVectors(this.instance.position, this.controls.target);
+
+        if (direction.lengthSq() === 0) {
+            return;
+        }
+
+        direction.normalize();
+
+        this.instance.position
+            .copy(this.controls.target)
+            .addScaledVector(direction, newDistance);
+
+        this.controls.update();
+    }
+
+    getZoomPercent() {
+        if (!this.instance || !this.controls) {
+            return 100;
+        }
+
+        const currentDistance = this.instance.position.distanceTo(
+            this.controls.target
+        );
+        const { minDistance, maxDistance } = this.zoomSettings;
+
+        const percent = THREE.MathUtils.mapLinear(
+            currentDistance,
+            maxDistance,
+            minDistance,
+            0,
+            100
+        );
+
+        return THREE.MathUtils.clamp(percent, 0, 100);
+    }
+
+    onZoomChange(callback) {
+        if (!this.controls) {
+            return () => {};
+        }
+
+        const handleControlsChange = () => {
+            callback(this.getZoomPercent());
+        };
+
+        this.controls.addEventListener("change", handleControlsChange);
+        handleControlsChange();
+
+        return () => {
+            this.controls?.removeEventListener("change", handleControlsChange);
+        };
+    }
 
     destroy(){
+        document.body.removeEventListener("click", this.onDebugClick);
         this.controls?.dispose();
         this.instance?.removeFromParent();
         this.controls = null;
         this.instance = null;
         this.scene = null;
         this.canvas = null;
+        this.onDebugClick = null;
     }
 }

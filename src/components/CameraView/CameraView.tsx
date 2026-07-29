@@ -7,7 +7,7 @@ import { useExperienceRef } from "../../three/ExperienceContext";
 
 const CameraView = () => {
 
-    const [selectedView, setSelectedView] = useState<string | null>(null);
+    const [selectedView, setSelectedView] = useState<string | null>("Right View");
     const sliderRef = useRef<HTMLDivElement>(null);
     const experienceRef = useExperienceRef();
 
