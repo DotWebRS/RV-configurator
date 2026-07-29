@@ -67,6 +67,8 @@ export default class Camera{
         this.controls.enableDamping = true;
         this.controls.minDistance = this.zoomSettings.minDistance;
         this.controls.maxDistance = this.zoomSettings.maxDistance;
+        this.controls.minPolarAngle = Math.PI/2.5;
+        this.controls.maxPolarAngle = Math.PI / 2;
     }
     resize(){
         this.instance.aspect = this.sizes.width / this.sizes.height;
