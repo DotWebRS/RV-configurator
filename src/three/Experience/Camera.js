@@ -1,6 +1,7 @@
 import * as THREE from "three"
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import Experience from "./Experience.js";
+import gsap from "gsap";
 
 export default class Camera{
     constructor(){
@@ -51,6 +52,7 @@ export default class Camera{
         
         this.setInstance();
         this.setOrbitControls();
+        this.activeView = "right";
     }
 
     setInstance(){
@@ -74,16 +76,110 @@ export default class Camera{
         this.controls.update();
     }
     updateCameraView(view){
-        this.instance.position.set(this.positions[view].camera.x, this.positions[view].camera.y, this.positions[view].camera.z);
-        this.controls.target.set(this.positions[view].target.x, this.positions[view].target.y, this.positions[view].target.z);
-        if (view === "top") {
-            this.instance.up.set(-1, 0, 0);
-        } else if (view === "bottom") {
-            this.instance.up.set(1, 0, 0);
-        } else {
-            this.instance.up.set(0, 1, 0);
+        const position = this.positions[view];
+
+        if (!position || !this.instance || !this.controls) {
+            return;
         }
-        this.controls.update();
+
+        this.activeView = view;
+
+        this.viewTimeline?.kill();
+        gsap.killTweensOf([
+            this.instance.position,
+            this.controls.target,
+            this.instance.up
+        ]);
+
+        this.animateCameraArc(position, view);
+    }
+
+    getViewUp(view) {
+        if (view === "top") return new THREE.Vector3(-1, 0, 0);
+        if (view === "bottom") return new THREE.Vector3(1, 0, 0);
+        return new THREE.Vector3(0, 1, 0);
+    }
+
+    animateCameraArc(position, view) {
+        const startTarget = this.controls.target.clone();
+        const endTarget = position.target.clone();
+        const startOffset = this.instance.position.clone().sub(startTarget);
+        const endOffset = position.camera.clone().sub(endTarget);
+        const startDirection = startOffset.clone().normalize();
+        const endDirection = endOffset.clone().normalize();
+        const startUp = this.instance.up.clone().normalize();
+        const endUp = this.getViewUp(view);
+        const positionRotation = new THREE.Quaternion().setFromUnitVectors(
+            startDirection,
+            endDirection
+        );
+        const upRotation = new THREE.Quaternion().setFromUnitVectors(
+            startUp,
+            endUp
+        );
+        const currentPositionRotation = new THREE.Quaternion();
+        const currentUpRotation = new THREE.Quaternion();
+        const identityRotation = new THREE.Quaternion();
+        const currentTarget = new THREE.Vector3();
+        const currentDirection = new THREE.Vector3();
+        const currentUp = new THREE.Vector3();
+        const progress = { value: 0 };
+        const startDistance = startOffset.length();
+        const endDistance = endOffset.length();
+
+        this.viewTimeline = gsap.to(progress, {
+            value: 1,
+            duration: 2,
+            ease: "power3.inOut",
+            overwrite: "auto",
+            onUpdate: () => {
+                currentPositionRotation.slerpQuaternions(
+                    identityRotation,
+                    positionRotation,
+                    progress.value
+                );
+                currentUpRotation.slerpQuaternions(
+                    identityRotation,
+                    upRotation,
+                    progress.value
+                );
+
+                currentTarget.lerpVectors(
+                    startTarget,
+                    endTarget,
+                    progress.value
+                );
+
+                currentDirection
+                    .copy(startDirection)
+                    .applyQuaternion(currentPositionRotation);
+
+                currentUp
+                    .copy(startUp)
+                    .applyQuaternion(currentUpRotation)
+                    .normalize();
+
+                const distance = THREE.MathUtils.lerp(
+                    startDistance,
+                    endDistance,
+                    progress.value
+                );
+
+                this.controls.target.copy(currentTarget);
+                this.instance.position
+                    .copy(currentTarget)
+                    .addScaledVector(currentDirection, distance);
+                this.instance.up.copy(currentUp);
+                this.controls.update();
+            },
+            onComplete: () => {
+                this.controls.target.copy(endTarget);
+                this.instance.position.copy(position.camera);
+                this.instance.up.copy(endUp);
+                this.controls.update();
+                this.viewTimeline = null;
+            }
+        });
     }
     setZoomPercent(percent) {
         if (!this.instance || !this.controls) {
@@ -157,6 +253,12 @@ export default class Camera{
 
     destroy(){
         document.body.removeEventListener("click", this.onDebugClick);
+        this.viewTimeline?.kill();
+        gsap.killTweensOf([
+            this.instance?.position,
+            this.controls?.target,
+            this.instance?.up
+        ]);
         this.controls?.dispose();
         this.instance?.removeFromParent();
         this.controls = null;
@@ -164,5 +266,7 @@ export default class Camera{
         this.scene = null;
         this.canvas = null;
         this.onDebugClick = null;
+        this.viewTimeline = null;
+        this.activeView = null;
     }
 }

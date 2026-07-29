@@ -26,7 +26,6 @@ export default class Experience{
         this.sizes = new Sizes(this.canvas);
         this.time = new Time();
         this.scene = new THREE.Scene();
-        this.scene.background = null;
         this.resources = new Resources(this.sources);
         this.camera = new Camera();
         this.renderer = new Renderer();
@@ -55,6 +54,9 @@ export default class Experience{
     onZoomChange(callback){
         return this.camera.onZoomChange(callback);
     }
+    whenInitialModelReady(){
+        return this.world?.ready ?? Promise.resolve(false);
+    }
     resize(){
         this.camera.resize();
         this.renderer.resize();
@@ -69,7 +71,9 @@ export default class Experience{
     }
     
     changeRV(modelPath){
-        this.world.changeRV(modelPath);
+        if(this.destroyed || !this.world) return Promise.resolve(false);
+
+        return this.world.changeRV(modelPath);
     }
 
     unloadWorld(){

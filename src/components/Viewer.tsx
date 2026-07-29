@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import {
     useExperienceRef,
+    useConfiguratorUi,
     type ExperienceInstance,
 } from "../three/ExperienceContext";
 
@@ -14,6 +15,7 @@ const Viewer = () => {
     const scrollPosition = useRef(0);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const experienceRef = useExperienceRef();
+    const { isModelLoading, setModelLoading } = useConfiguratorUi();
     const toggleFullscreen = () => {
         setIsFullscreen(!isFullscreen);
 
@@ -68,6 +70,12 @@ const Viewer = () => {
             unsubscribeZoom = experience.onZoomChange((percent: number) => {
                 setZoomPercent(String(Math.round(percent)));
             });
+
+            await experience.whenInitialModelReady();
+
+            if (!cancelled) {
+                setModelLoading(false);
+            }
         };
 
         createExperience();
@@ -140,6 +148,18 @@ const Viewer = () => {
 
             />*/}
             <canvas ref={canvasRef}></canvas>
+
+            {isModelLoading && (
+                <div
+                    className="model-loading-overlay"
+                    role="status"
+                    aria-live="polite"
+                    aria-label="Loading model"
+                >
+                    <div className="model-loading-spinner" aria-hidden="true" />
+                    <p>Loading model <span aria-hidden="true">. . .</span></p>
+                </div>
+            )}
 
             {/* DONJI LEVI KONTROLER */}
             <div className="cursor-controls">

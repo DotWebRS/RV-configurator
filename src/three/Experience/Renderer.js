@@ -22,7 +22,7 @@ export default class Renderer{
             powerPreference: "high-performance"
         })
         this.instance.outputColorSpace = THREE.SRGBColorSpace;
-        this.instance.toneMapping = THREE.ACESFilmicToneMapping;
+        this.instance.toneMapping = THREE.LinearToneMapping;
         this.instance.toneMappingExposure = 1.0;
         this.instance.shadowMap.enabled = true;
         this.instance.shadowMap.type = THREE.PCFShadowMap;

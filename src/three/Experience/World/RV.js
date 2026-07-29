@@ -20,7 +20,19 @@ export default class RV{
         this.gltf = null;
         this.pendingGltf = null;
         this.modelPath = modelPath;
+        this.readySettled = false;
+        this.ready = new Promise((resolve) => {
+            this.resolveReady = resolve;
+        });
         this.loadModel(modelPath);
+    }
+
+    finishReady(success) {
+        if (this.readySettled) return;
+
+        this.readySettled = true;
+        this.resolveReady?.(success);
+        this.resolveReady = null;
     }
 
     loadModel(modelPath){
@@ -55,6 +67,7 @@ export default class RV{
                     if (this.pendingGltf === file) {
                         this.pendingGltf = null;
                     }
+                    this.finishReady(false);
                 });
             },
             (xhr) => {
@@ -75,6 +88,7 @@ export default class RV{
 
                 console.error("GLTF loading failed:");
                 console.error(error);
+                this.finishReady(false);
 
             }
         );
@@ -170,14 +184,14 @@ export default class RV{
             if (!material) continue;
 
             // material.side = THREE.FrontSide;
-            material.vertexColors = false;
+            /*material.vertexColors = false;
             material.metalness = 0;
             if (material.metalnessMap) {
                 this.detachedTextures.add(material.metalnessMap);
             }
             material.metalnessMap = null;
             material.roughness = 0.6;
-            material.needsUpdate = true;
+            material.needsUpdate = true;*/
         }
     }
 
@@ -294,6 +308,7 @@ export default class RV{
         this.gltf = file;
         this.model = model;
         this.scene.add(this.model);
+        this.finishReady(true);
     }
 
     destroy() {
@@ -301,6 +316,7 @@ export default class RV{
 
         this.destroyed = true;
         this.loadGeneration++;
+        this.finishReady(false);
         this.cancelIdleTasks();
 
         const resources = new Set([this.gltf, this.pendingGltf]);
@@ -316,6 +332,8 @@ export default class RV{
         this.gltfLoader = null;
         this.dracoLoader = null;
         this.modelPath = null;
+        this.ready = null;
+        this.resolveReady = null;
         this.scene = null;
         this.Experience = null;
     }
