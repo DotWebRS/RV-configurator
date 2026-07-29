@@ -94,6 +94,21 @@ export default class Camera{
         this.animateCameraArc(position, view);
     }
 
+    isMobileViewport() {
+        return window.matchMedia("(max-width: 768px)").matches;
+    }
+
+    getDistanceForZoomPercent(percent) {
+        const normalizedPercent = THREE.MathUtils.clamp(percent, 0, 100) / 100;
+        const { minDistance, maxDistance } = this.zoomSettings;
+
+        return THREE.MathUtils.lerp(
+            maxDistance,
+            minDistance,
+            normalizedPercent
+        );
+    }
+
     getViewUp(view) {
         if (view === "top") return new THREE.Vector3(-1, 0, 0);
         if (view === "bottom") return new THREE.Vector3(1, 0, 0);
@@ -125,7 +140,11 @@ export default class Camera{
         const currentUp = new THREE.Vector3();
         const progress = { value: 0 };
         const startDistance = startOffset.length();
-        const endDistance = endOffset.length();
+        const endDistance = this.isMobileViewport()
+            ? this.getDistanceForZoomPercent(60)
+            : endOffset.length();
+        const finalPosition = endTarget.clone()
+            .addScaledVector(endDirection, endDistance);
 
         this.viewTimeline = gsap.to(progress, {
             value: 1,
@@ -174,7 +193,7 @@ export default class Camera{
             },
             onComplete: () => {
                 this.controls.target.copy(endTarget);
-                this.instance.position.copy(position.camera);
+                this.instance.position.copy(finalPosition);
                 this.instance.up.copy(endUp);
                 this.controls.update();
                 this.viewTimeline = null;
@@ -187,15 +206,7 @@ export default class Camera{
         }
 
         const clampedPercent = THREE.MathUtils.clamp(percent, 0, 100);
-        const normalizedPercent = clampedPercent / 100;
-
-        const { minDistance, maxDistance } = this.zoomSettings;
-
-        const newDistance = THREE.MathUtils.lerp(
-            maxDistance,
-            minDistance,
-            normalizedPercent
-        );
+        const newDistance = this.getDistanceForZoomPercent(clampedPercent);
 
         const direction = new THREE.Vector3()
             .subVectors(this.instance.position, this.controls.target);
