@@ -17,6 +17,7 @@ export default class Experience{
         }
         instance = this;
         this.destroyed = false;
+        this.textureColorListeners = new Set();
         this.sources = sources;
         //Global access
         window.experience = this;
@@ -53,6 +54,28 @@ export default class Experience{
     }
     onZoomChange(callback){
         return this.camera.onZoomChange(callback);
+    }
+    getTextureColors(){
+        return this.world?.rv?.getTextureColors() ?? [];
+    }
+    setTextureColor(patternId, color){
+        return this.world?.rv?.setTextureColor(patternId, color) ?? false;
+    }
+    resetTextureColors(){
+        return this.world?.rv?.resetTextureColors() ?? false;
+    }
+    onTextureColorsChange(callback){
+        this.textureColorListeners.add(callback);
+        callback(this.getTextureColors());
+
+        return () => {
+            this.textureColorListeners?.delete(callback);
+        };
+    }
+    notifyTextureColorsChanged(colors){
+        for(const callback of this.textureColorListeners){
+            callback(colors);
+        }
     }
     whenInitialModelReady(){
         return this.world?.ready ?? Promise.resolve(false);
@@ -96,6 +119,7 @@ export default class Experience{
         if(this.destroyed) return;
 
         this.destroyed = true;
+        this.textureColorListeners.clear();
 
         this.time?.off('tick', this.onTick);
         this.sizes?.off('resize', this.onResize);
@@ -125,5 +149,6 @@ export default class Experience{
         this.time = null;
         this.onResize = null;
         this.onTick = null;
+        this.textureColorListeners = null;
     }
 }

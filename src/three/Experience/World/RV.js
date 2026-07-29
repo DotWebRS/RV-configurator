@@ -6,6 +6,7 @@ import {
     disposeLoadedResource,
     disposeTexture
 } from "../Utils/dispose.js";
+import TextureChanger from "../Utils/TextureChanger.js";
 
 export default class RV{
     constructor(modelPath){
@@ -19,6 +20,7 @@ export default class RV{
         this.model = null;
         this.gltf = null;
         this.pendingGltf = null;
+        this.textureChanger = null;
         this.modelPath = modelPath;
         this.readySettled = false;
         this.ready = new Promise((resolve) => {
@@ -62,6 +64,8 @@ export default class RV{
                         console.error("GLTF model preparation failed:");
                         console.error(error);
                     }
+                    this.textureChanger?.destroy();
+                    this.textureChanger = null;
                     this.disposeResource(file);
                     this.disposeDetachedTextures();
                     if (this.pendingGltf === file) {
@@ -285,7 +289,29 @@ export default class RV{
             return;
         }
 
-        const textures = this.getModelTextures(meshes);
+        this.textureChanger = new TextureChanger(
+            file,
+            meshes,
+            (colors) => this.Experience?.notifyTextureColorsChanged(colors),
+        );
+        const textureChangerReady = await this.textureChanger.initialize();
+
+        if (!this.isCurrentLoad(generation)) {
+            this.textureChanger.destroy();
+            this.textureChanger = null;
+            this.disposeResource(file);
+            this.disposeDetachedTextures();
+            return;
+        }
+
+        if (!textureChangerReady) {
+            console.warn("RV model nema dostupne exterior ID maske.");
+        }
+
+        const textures = [
+            ...this.getModelTextures(meshes),
+            ...this.textureChanger.getTextures(),
+        ];
         if (!await this.initializeTextures(textures, generation)) {
             this.disposeResource(file);
             this.disposeDetachedTextures();
@@ -311,6 +337,18 @@ export default class RV{
         this.finishReady(true);
     }
 
+    getTextureColors() {
+        return this.textureChanger?.getColors() ?? [];
+    }
+
+    setTextureColor(patternId, color) {
+        return this.textureChanger?.setColor(patternId, color) ?? false;
+    }
+
+    resetTextureColors() {
+        return this.textureChanger?.resetColors() ?? false;
+    }
+
     destroy() {
         if (this.destroyed) return;
 
@@ -318,6 +356,8 @@ export default class RV{
         this.loadGeneration++;
         this.finishReady(false);
         this.cancelIdleTasks();
+        this.textureChanger?.destroy();
+        this.textureChanger = null;
 
         const resources = new Set([this.gltf, this.pendingGltf]);
         this.model?.removeFromParent();

@@ -5,6 +5,7 @@ import {
     useExperienceRef,
     useConfiguratorUi,
     type ExperienceInstance,
+    type PatternColor,
 } from "../three/ExperienceContext";
 
 const Viewer = () => {
@@ -12,10 +13,26 @@ const Viewer = () => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [cursorMode, setCursorMode] = useState("arrow");
     const [zoomPercent, setZoomPercent] = useState("100");
+    const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+    const [patternColors, setPatternColors] = useState<PatternColor[]>([]);
     const scrollPosition = useRef(0);
+    const zoomPercentRef = useRef("100");
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const experienceRef = useExperienceRef();
-    const { isModelLoading, setModelLoading } = useConfiguratorUi();
+    const {
+        isModelLoading,
+        setModelLoading,
+        setActiveCameraView,
+    } = useConfiguratorUi();
+    const getActualZoomMaximum = () =>
+        typeof window !== "undefined"
+        && window.matchMedia("(max-width: 768px)").matches
+            ? 60
+            : 100;
+    const displayToActualZoom = (displayPercent: number) =>
+        displayPercent * getActualZoomMaximum() / 100;
+    const actualToDisplayZoom = (actualPercent: number) =>
+        actualPercent * 100 / getActualZoomMaximum();
     const toggleFullscreen = () => {
         setIsFullscreen(!isFullscreen);
 
@@ -23,7 +40,7 @@ const Viewer = () => {
     const applyZoomPercent = (value: number) => {
         const nextPercent = Math.min(100, Math.max(0, value));
         setZoomPercent(String(Math.round(nextPercent)));
-        experienceRef.current?.setZoomPercent(nextPercent);
+        experienceRef.current?.setZoomPercent(displayToActualZoom(nextPercent));
     };
     const changeZoomBy = (amount: number) => {
         const currentPercent = Number(zoomPercent);
@@ -31,6 +48,26 @@ const Viewer = () => {
             (Number.isFinite(currentPercent) ? currentPercent : 100) + amount
         );
     };
+    useEffect(() => {
+        zoomPercentRef.current = zoomPercent;
+    }, [zoomPercent]);
+
+    useEffect(() => {
+        const mobileQuery = window.matchMedia("(max-width: 768px)");
+        const handleViewportChange = () => {
+            const displayPercent = Number(zoomPercentRef.current);
+
+            if (!Number.isFinite(displayPercent)) return;
+
+            experienceRef.current?.setZoomPercent(
+                displayPercent * (mobileQuery.matches ? 60 : 100) / 100,
+            );
+        };
+
+        mobileQuery.addEventListener("change", handleViewportChange);
+        return () => mobileQuery.removeEventListener("change", handleViewportChange);
+    }, []);
+
     useEffect(() => {
         if (isFullscreen) {
             scrollPosition.current = window.scrollY;
@@ -52,6 +89,7 @@ const Viewer = () => {
 
         let cancelled = false;
         let unsubscribeZoom = () => {};
+        let unsubscribeTextureColors = () => {};
 
         const createExperience = async () => {
             const { default: Experience } = await import('../three/Experience/Experience');
@@ -66,10 +104,15 @@ const Viewer = () => {
             }
 
             experienceRef.current = experience as ExperienceInstance;
-            experience.setZoomPercent(100);
+            experience.setZoomPercent(getActualZoomMaximum());
             unsubscribeZoom = experience.onZoomChange((percent: number) => {
-                setZoomPercent(String(Math.round(percent)));
+                setZoomPercent(String(Math.round(actualToDisplayZoom(percent))));
             });
+            unsubscribeTextureColors = experience.onTextureColorsChange(
+                (colors: PatternColor[]) => {
+                    setPatternColors(colors);
+                },
+            );
 
             await experience.whenInitialModelReady();
 
@@ -83,6 +126,7 @@ const Viewer = () => {
         return () => {
             cancelled = true;
             unsubscribeZoom();
+            unsubscribeTextureColors();
             document.body.style.overflow = "auto";
             experienceRef.current?.destroy();
             experienceRef.current = null;
@@ -119,7 +163,6 @@ const Viewer = () => {
 
             <div
                 className="rotate-hint"
-                onClick={() => console.log("Kliknuo sam na rotate!")}
                 >
                 <img
                     src="/icons/rotate-icon.png"
@@ -131,6 +174,49 @@ const Viewer = () => {
                     Drag to rotate
                 </span>
                 </div>
+
+            <div className="palette-control">
+                <button
+                    type="button"
+                    className={`palette-trigger ${isPaletteOpen ? "active" : ""}`}
+                    onClick={() => setIsPaletteOpen((open) => !open)}
+                    aria-expanded={isPaletteOpen}
+                    aria-controls="viewer-color-palette"
+                    disabled={isModelLoading || patternColors.length === 0}
+                >
+                    <span className="palette-icon" aria-hidden="true" />
+                    <span>Color palette</span>
+                </button>
+
+                {isPaletteOpen && patternColors.length > 0 && (
+                    <div
+                        id="viewer-color-palette"
+                        className="pattern-palette"
+                        aria-label="Pattern colors"
+                    >
+                        {patternColors.map((pattern) => (
+                            <label
+                                key={pattern.id}
+                                className="pattern-color"
+                                style={{ backgroundColor: pattern.color }}
+                                title={`Pattern ${pattern.id}: ${pattern.color}`}
+                            >
+                                <input
+                                    type="color"
+                                    value={pattern.color}
+                                    onChange={(event) => {
+                                        experienceRef.current?.setTextureColor(
+                                            pattern.id,
+                                            event.target.value,
+                                        );
+                                    }}
+                                    aria-label={`Change pattern ${pattern.id} color`}
+                                />
+                            </label>
+                        ))}
+                    </div>
+                )}
+            </div>
 
 
             <div className="view-badge">
@@ -222,7 +308,10 @@ const Viewer = () => {
                         onBlur={() => {
                             if (zoomPercent === "") {
                                 applyZoomPercent(
-                                    experienceRef.current?.getZoomPercent() ?? 100
+                                    actualToDisplayZoom(
+                                        experienceRef.current?.getZoomPercent()
+                                            ?? getActualZoomMaximum(),
+                                    )
                                 );
                             }
                         }}
@@ -251,7 +340,9 @@ const Viewer = () => {
                             console.warn("Experience još nije inicijalizovan.");
                             return;
                         }
+                        experience.resetTextureColors();
                         experience.updateCameraView("right");
+                        setActiveCameraView("Right View");
                     }}
                 >
                     <img

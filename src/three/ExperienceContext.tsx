@@ -17,6 +17,12 @@ export type ExperienceInstance = {
     setZoomPercent: (percent: number) => void;
     getZoomPercent: () => number;
     onZoomChange: (callback: (percent: number) => void) => () => void;
+    getTextureColors: () => PatternColor[];
+    setTextureColor: (patternId: number, color: string) => boolean;
+    resetTextureColors: () => boolean;
+    onTextureColorsChange: (
+        callback: (colors: PatternColor[]) => void
+    ) => () => void;
     whenInitialModelReady: () => Promise<boolean>;
     changeRV: (modelPath: string) => Promise<boolean>;
     sizes: {
@@ -26,6 +32,12 @@ export type ExperienceInstance = {
     renderer: unknown;
     scene: unknown;
     world: unknown;
+};
+
+export type PatternColor = {
+    id: number;
+    color: string;
+    originalColor: string;
 };
 
 type ExperienceRef = MutableRefObject<ExperienceInstance | null>;

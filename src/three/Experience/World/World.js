@@ -39,6 +39,7 @@ export default class World{
         if(this.destroyed) return Promise.resolve(false);
 
         this.rv?.destroy();
+        this.experience.notifyTextureColorsChanged([]);
         this.rv = new RV(modelPath);
         return this.rv.ready;
     }
