@@ -1,18 +1,27 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { cameraViews } from "../data";
-import { useExperienceRef } from "../../three/ExperienceContext";
+import {
+    useConfiguratorUi,
+    useExperienceRef,
+} from "../../three/ExperienceContext";
 
 
 const CameraView = () => {
 
-    const [selectedView, setSelectedView] = useState<string | null>("Right View");
     const sliderRef = useRef<HTMLDivElement>(null);
     const experienceRef = useExperienceRef();
+    const {
+        activeCameraView,
+        setActiveCameraView,
+        isModelLoading,
+    } = useConfiguratorUi();
 
 
     const handleCardClick = (view: string) => {
+        if (isModelLoading || activeCameraView === view) return;
+
         const experience = experienceRef.current;
 
         if (!experience) {
@@ -20,8 +29,7 @@ const CameraView = () => {
             return;
         }
 
-        setSelectedView(view);
-        console.log(view.split(" ")[0].toLowerCase());
+        setActiveCameraView(view);
         experience.updateCameraView(view.split(" ")[0].toLowerCase());
 
     };
@@ -75,7 +83,7 @@ const CameraView = () => {
 
                                 <div
                                     className={`camera-card ${
-                                        selectedView === view ? "active" : ""
+                                        activeCameraView === view ? "active" : ""
                                     }`}
                                     key={view}
                                     onClick={() => handleCardClick(view)}

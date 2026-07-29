@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useExperienceRef } from "../three/ExperienceContext";
+import {
+    useConfiguratorUi,
+    useExperienceRef,
+} from "../three/ExperienceContext";
 
 const floorPlans = [
     {
@@ -26,7 +29,7 @@ const floorPlans = [
         grey: "40 gal",
         black: "40 gal",
         fresh: "75 gal",
-        modelPath: "threejs-assets/regent/models/49RH/Regent Hauler Flyer_49RH_F10-optimized-2k.glb"
+        modelPath: "threejs-assets/regent/models/49RH/Regent Hauler Flyer_49RH_F10-optimized-2k-rotated.glb"
     },
     /*{
         id: 3,
@@ -45,9 +48,14 @@ const RightPanel = () => {
 
     const [selectedCard, setSelectedCard] = useState(1);
     const experienceRef = useExperienceRef();
+    const {
+        isModelLoading,
+        setModelLoading,
+        setActiveCameraView,
+    } = useConfiguratorUi();
 
-    const handleCardClick = (plan: (typeof floorPlans)[number]) => {
-        if (selectedCard === plan.id) return;
+    const handleCardClick = async (plan: (typeof floorPlans)[number]) => {
+        if (isModelLoading || selectedCard === plan.id) return;
 
         const experience = experienceRef.current;
 
@@ -56,8 +64,16 @@ const RightPanel = () => {
             return;
         }
 
-        experience.changeRV(plan.modelPath);
         setSelectedCard(plan.id);
+        setActiveCameraView("Right View");
+        experience.updateCameraView("right");
+        setModelLoading(true);
+
+        try {
+            await experience.changeRV(plan.modelPath);
+        } finally {
+            setModelLoading(false);
+        }
     };
 
     return (

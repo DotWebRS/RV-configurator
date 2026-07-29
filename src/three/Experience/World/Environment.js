@@ -1,23 +1,27 @@
 import * as THREE from 'three';
 import Experience from "../Experience.js";
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+
 export default class Environment{
     constructor(){
         this.experience = new Experience();
         this.scene = this.experience.scene;
         this.resources = this.experience.resources;
         this.debug = this.experience.debug;
+        this.destroyed = false;
+        this.lightTarget = new THREE.Vector3(0.5, 2.25, 1.26);
 
         if(this.debug.active){
             this.debugFolder = this.debug.ui.addFolder("enviornment");
         }
 
         this.setSunLight();
-        this.setFillLight();
+        this.setSurroundLights();
         this.setHemisphereLight();
-        this.setAmbientLight();
+        this.setHDR();
     }
     setSunLight(){
-        this.sunLight = new THREE.DirectionalLight('#ffffff', 2.5);
+        this.sunLight = new THREE.DirectionalLight('#fffaf2', 0.85);
         this.sunLight.castShadow = true;
         this.sunLight.shadow.mapSize.set(
             2048,
@@ -25,113 +29,162 @@ export default class Environment{
         );
 
         this.sunLight.shadow.camera.near = 0.1;
-        this.sunLight.shadow.camera.far = 30;
+        this.sunLight.shadow.camera.far = 50;
 
-        this.sunLight.shadow.camera.left = -8;
-        this.sunLight.shadow.camera.right = 8;
-        this.sunLight.shadow.camera.top = 8;
-        this.sunLight.shadow.camera.bottom = -8;
+        this.sunLight.shadow.camera.left = -12;
+        this.sunLight.shadow.camera.right = 12;
+        this.sunLight.shadow.camera.top = 12;
+        this.sunLight.shadow.camera.bottom = -12;
 
         this.sunLight.shadow.bias = -0.0001;
         this.sunLight.shadow.normalBias = 0.02;
         this.sunLight.shadow.radius = 3;
-        this.sunLight.position.set(5,38,5);
+        this.sunLight.position.set(6, 14, 8);
+        this.sunLight.target.position.copy(this.lightTarget);
         this.scene.add(this.sunLight);
+        this.scene.add(this.sunLight.target);
 
         if(this.debug.active){
             this.debugFolder
                 .add(this.sunLight, 'intensity')
-                .name('sunLightIntensity')
+                .name('keyLightIntensity')
                 .min(0)
                 .max(10)
                 .step(0.001);
             this.debugFolder
                 .add(this.sunLight.position, 'x')
                 .name('sunLightX')
-                .min(-5)
-                .max(5)
+                .min(-20)
+                .max(20)
                 .step(0.001);
             this.debugFolder
                 .add(this.sunLight.position, 'y')
                 .name('sunLightY')
-                .min(-5)
-                .max(5)
+                .min(-20)
+                .max(20)
                 .step(0.001);
             this.debugFolder
                 .add(this.sunLight.position, 'z')
                 .name('sunLightZ')
-                .min(-5)
-                .max(5)
+                .min(-20)
+                .max(20)
                 .step(0.001);
         }
     }
 
-    setFillLight() {
-        /**
-         * Veoma blago svetlo sa suprotne strane.
-         * Ne treba da preuzme ulogu HDRI-ja.
-         */
-        this.fillLight =
-            new THREE.DirectionalLight(
-                "#dce8ff",
-                0.35
-            );
+    setSurroundLights() {
+        const lightSettings = [
+            {
+                name: "frontLight",
+                position: new THREE.Vector3(0.5, 6.5, 16)
+            },
+            {
+                name: "backLight",
+                position: new THREE.Vector3(0.5, 6.5, -16)
+            },
+            {
+                name: "leftLight",
+                position: new THREE.Vector3(-16, 6.5, 1.26)
+            },
+            {
+                name: "rightLight",
+                position: new THREE.Vector3(16, 6.5, 1.26)
+            }
+        ];
 
-        this.fillLight.position.set(-4, 3, -5);
+        this.surroundLights = lightSettings.map((settings) => {
+            const light = new THREE.DirectionalLight("#eef2f8", 0.55);
+            light.name = settings.name;
+            light.position.copy(settings.position);
+            light.target.position.copy(this.lightTarget);
 
-        this.fillLight.target.position.set(0, 1, 0);
+            this.scene.add(light);
+            this.scene.add(light.target);
 
-        this.scene.add(this.fillLight);
-        this.scene.add(this.fillLight.target);
+            if (this.debug.active) {
+                this.debugFolder
+                    .add(light, "intensity")
+                    .name(`${settings.name}Intensity`)
+                    .min(0)
+                    .max(2)
+                    .step(0.01);
+            }
 
-        if (this.debug.active) {
-            this.debugFolder
-                .add(this.fillLight, "intensity")
-                .name("fillLightIntensity")
-                .min(0)
-                .max(3)
-                .step(0.01);
-        }
+            return light;
+        });
     }
 
     setHemisphereLight(){
         this.hemisphereLight = new THREE.HemisphereLight(
 
-            0xffffff,   // boja neba
+            0xd8e2f0,   // boja neba
 
-            0x8b8b8b,   // boja poda
+            0x303744,   // boja poda
 
-            0.85
+            0.55
 
         );
 
         this.scene.add(this.hemisphereLight);
+
+        if (this.debug.active) {
+            this.debugFolder
+                .add(this.hemisphereLight, "intensity")
+                .name("hemisphereIntensity")
+                .min(0)
+                .max(2)
+                .step(0.01);
+        }
     }
 
-    setAmbientLight(){
-        this.ambientLight = new THREE.AmbientLight(
-            0xffffff,
-            0.45
-        );
+    setHDR(){
+        new RGBELoader()
+        .setPath("/threejs-assets/hdr/")
+        .load("horn-koppe_spring_1k.hdr", (texture) => {
+            if (this.destroyed) {
+                texture.dispose();
+                return;
+            }
 
-        this.scene.add(this.ambientLight);
+            this.environmentTexture = texture;
+            this.environmentTexture.mapping = THREE.EquirectangularReflectionMapping;
+
+            this.scene.environment = this.environmentTexture;
+            this.scene.environmentIntensity = 1.1;
+            this.scene.background = null;
+        });
     }
 
     destroy(){
+        if (this.destroyed) return;
+        this.destroyed = true;
+
         this.sunLight?.removeFromParent();
         this.sunLight?.target?.removeFromParent();
         this.sunLight?.shadow?.dispose?.();
 
-        this.fillLight?.removeFromParent();
-        this.fillLight?.target?.removeFromParent();
-        this.fillLight?.shadow?.dispose?.();
+        this.surroundLights?.forEach((light) => {
+            light.removeFromParent();
+            light.target?.removeFromParent();
+            light.shadow?.dispose?.();
+        });
+
+        this.hemisphereLight?.removeFromParent();
 
         this.debugFolder?.destroy?.();
 
+        if (this.scene?.environment === this.environmentTexture) {
+            this.scene.environment = null;
+        }
+        this.environmentTexture?.dispose();
+        this.environmentTexture = null;
         this.sunLight = null;
-        this.fillLight = null;
+        this.surroundLights = null;
+        this.hemisphereLight = null;
+        this.lightTarget = null;
         this.debugFolder = null;
         this.scene = null;
         this.resources = null;
+        
     }
 }
