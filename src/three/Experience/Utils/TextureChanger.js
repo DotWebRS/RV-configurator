@@ -1,19 +1,42 @@
 import * as THREE from "three";
-import { disposeTexture } from "./dispose.js";
 
-const EXTENSION_NAME = "EXT_mesh_features";
-const FEATURE_LABEL = "rvPatternId";
-
-function toHexColor(sourceColor) {
-    return `#${sourceColor
-        .map((channel) => Math.max(0, Math.min(255, channel))
-            .toString(16)
-            .padStart(2, "0"))
-        .join("")}`;
-}
+const MASK_NAME = "masked";
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 
 function toLinearColor(color) {
     return new THREE.Color().setStyle(color, THREE.SRGBColorSpace);
+}
+
+function parsePatternColors(mesh) {
+    const value = mesh.userData?.rvPatternColors;
+
+    if (!value) return [];
+
+    try {
+        const colors = typeof value === "string" ? JSON.parse(value) : value;
+
+        return Object.entries(colors)
+            .map(([id, color]) => ({ id: Number(id), color }))
+            .filter(({ id, color }) => Number.isInteger(id) && id > 0 && HEX_COLOR.test(color));
+    } catch (error) {
+        console.warn(
+            `TextureChanger: mesh "${mesh.name}" ima neispravan rvPatternColors JSON.`,
+            error,
+        );
+        return [];
+    }
+}
+
+function getMaterialMaskTextures(material) {
+    const textures = new Set();
+
+    for (const value of Object.values(material)) {
+        if (value?.isTexture && value.name?.toLowerCase().includes(MASK_NAME)) {
+            textures.add(value);
+        }
+    }
+
+    return [...textures];
 }
 
 export default class TextureChanger {
@@ -26,53 +49,72 @@ export default class TextureChanger {
         this.materialStates = new Map();
         this.compiledShaders = new Set();
 
-        const metadata = gltf.parser?.json?.extras?.rvPatternMasks;
-        this.patterns = (metadata?.palette ?? []).map(({ id, sourceColor }) => {
-            const originalColor = toHexColor(sourceColor);
-
-            return {
-                id,
-                sourceColor: [...sourceColor],
-                originalColor,
-                color: originalColor,
-            };
-        });
+        this.patterns = [];
     }
 
     async initialize() {
-        if (this.destroyed || this.patterns.length === 0) return false;
+        if (this.destroyed) return false;
 
-        const parser = this.gltf.parser;
+        const patternsById = new Map();
         const materialMasks = new Map();
 
         for (const mesh of this.meshes) {
-            const extension = mesh.userData?.gltfExtensions?.[EXTENSION_NAME];
-            const feature = extension?.featureIds?.find(
-                (entry) => entry.label === FEATURE_LABEL && entry.texture,
-            );
-            const textureIndex = feature?.texture?.index;
-
-            if (!Number.isInteger(textureIndex) || !mesh.material) continue;
-
-            const maskTexture = await parser.getDependency("texture", textureIndex);
-            if (this.destroyed) {
-                maskTexture?.dispose();
-                return false;
-            }
-
-            maskTexture.colorSpace = THREE.NoColorSpace;
-            maskTexture.magFilter = THREE.NearestFilter;
-            maskTexture.minFilter = THREE.NearestFilter;
-            maskTexture.generateMipmaps = false;
-            maskTexture.needsUpdate = true;
-            this.maskTextures.add(maskTexture);
+            if (!mesh.material) continue;
 
             const materials = Array.isArray(mesh.material)
                 ? mesh.material
                 : [mesh.material];
+            const maskedMaterials = materials
+                .map((material) => ({
+                    material,
+                    masks: material ? getMaterialMaskTextures(material) : [],
+                }))
+                .filter(({ masks }) => masks.length > 0);
 
-            for (const material of materials) {
-                if (!material || !material.map) continue;
+            if (maskedMaterials.length === 0) continue;
+
+            const meshPatterns = parsePatternColors(mesh);
+            if (meshPatterns.length === 0) {
+                console.warn(
+                    `TextureChanger: mesh "${mesh.name}" ima masked teksturu, ali nema rvPatternColors.`,
+                );
+                continue;
+            }
+
+            for (const { id, color } of meshPatterns) {
+                const normalizedColor = color.toLowerCase();
+                const existing = patternsById.get(id);
+
+                if (existing && existing.originalColor !== normalizedColor) {
+                    console.warn(
+                        `TextureChanger: ID ${id} ima razliÄite osnovne boje (${existing.originalColor} i ${normalizedColor}). Koristi se prva vrednost.`,
+                    );
+                    continue;
+                }
+
+                if (!existing) {
+                    patternsById.set(id, {
+                        id,
+                        originalColor: normalizedColor,
+                        color: normalizedColor,
+                    });
+                }
+            }
+
+            for (const { material, masks } of maskedMaterials) {
+                if (masks.length > 1) {
+                    console.warn(
+                        `TextureChanger: materijal "${material.name}" sadrÅ¾i viÅ¡e masked tekstura. Koristi se prva.`,
+                    );
+                }
+
+                const maskTexture = masks[0];
+                maskTexture.colorSpace = THREE.NoColorSpace;
+                maskTexture.magFilter = THREE.NearestFilter;
+                maskTexture.minFilter = THREE.NearestFilter;
+                maskTexture.generateMipmaps = false;
+                maskTexture.needsUpdate = true;
+                this.maskTextures.add(maskTexture);
 
                 const existingMask = materialMasks.get(material);
                 if (existingMask && existingMask !== maskTexture) {
@@ -84,6 +126,13 @@ export default class TextureChanger {
 
                 materialMasks.set(material, maskTexture);
             }
+        }
+
+        this.patterns = [...patternsById.values()].sort((a, b) => a.id - b.id);
+
+        if (this.patterns.length === 0 || materialMasks.size === 0) {
+            this.emitColors();
+            return false;
         }
 
         for (const [material, maskTexture] of materialMasks) {
@@ -103,7 +152,7 @@ export default class TextureChanger {
             toLinearColor(originalColor));
         const selectedColors = this.patterns.map(({ color }) =>
             toLinearColor(color));
-        const changedPatterns = this.patterns.map(() => 0);
+        const changedPatterns = this.patterns.map(() => 1);
         const applyBranches = this.patterns
             .map(
                 ({ id }, index) => `
@@ -217,27 +266,7 @@ vec3 rvApplyPatternColor(vec3 rvBaseColor, vec2 rvUv) {
                     originalColor,
                     THREE.SRGBColorSpace,
                 );
-                state.changedPatterns[index] = 0;
-            }
-        }
-
-        this.emitColors();
-        return true;
-    }
-
-    resetColors() {
-        if (this.destroyed) return false;
-
-        for (let index = 0; index < this.patterns.length; index += 1) {
-            const originalColor = this.patterns[index].originalColor;
-            this.patterns[index].color = originalColor;
-
-            for (const state of this.materialStates.values()) {
-                state.selectedColors[index].setStyle(
-                    originalColor,
-                    THREE.SRGBColorSpace,
-                );
-                state.changedPatterns[index] = 0;
+                state.changedPatterns[index] = 1;
             }
         }
 
@@ -258,12 +287,6 @@ vec3 rvApplyPatternColor(vec3 rvBaseColor, vec2 rvUv) {
             material.onBeforeCompile = state.originalOnBeforeCompile;
             material.customProgramCacheKey = state.originalProgramCacheKey;
             material.needsUpdate = true;
-        }
-
-        const disposedTextures = new Set();
-        const disposedImages = new Set();
-        for (const texture of this.maskTextures) {
-            disposeTexture(texture, disposedTextures, disposedImages);
         }
 
         this.materialStates.clear();

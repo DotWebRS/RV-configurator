@@ -8,8 +8,11 @@ type Upgrade = { id: string; name: string; price: number; image: string };
 type ContactForm = { firstName: string; lastName: string; phone: string; state: string; email: string; serviceConsent: boolean; marketingConsent: boolean };
 
 const floorPlans = [
+    /* SaÄuvano za ponovno ukljuÄivanje Regent floor plan kartica:
     { id: 1, name: "48FLB", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/regent/models/48FLB/Regent Hauler Flyer_48FLB_(10707)_V7-optimized-2k.glb" },
     { id: 2, name: "49RH", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/regent/models/49RH/Regent Hauler Flyer_49RH_F10-optimized-2k-rotated.glb" },
+    */
+    { id: 3, name: "33EFS", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/Elegante/models/elegante test.glb" },
 ];
 
 const upgradeGroups: Record<string, Upgrade[]> = {
@@ -58,7 +61,7 @@ const upgradeCategories = [...Object.keys(upgradeGroups), "Paint"];
 
 export default function RightPanel() {
     const [step, setStep] = useState(1);
-    const [selectedPlan, setSelectedPlan] = useState(1);
+    const [selectedPlan, setSelectedPlan] = useState(3);
     const [group, setGroup] = useState("Interior");
     const [selected, setSelected] = useState<Record<string, Upgrade>>({});
     const [preview, setPreview] = useState<Upgrade | null>(null);
@@ -70,7 +73,7 @@ export default function RightPanel() {
     const upgradesTotal = useMemo(() => Object.values(selected).reduce((sum, item) => sum + item.price, 0), [selected]);
     const basePrice = 176745;
     const buildConfiguration = useMemo(() => ({
-        model: "Luxe Toy Hauler",
+        model: "Luxe Elegante",
         floorPlan: floorPlans.find((plan) => plan.id === selectedPlan)?.name ?? null,
         basePrice,
         additionalOptions: Object.values(selected).map(({ id, name, price }) => ({ id, name, price })),
