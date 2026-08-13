@@ -49,6 +49,8 @@ type ConfiguratorUiContextValue = {
     setActiveCameraView: (view: string) => void;
     isModelLoading: boolean;
     setModelLoading: (loading: boolean) => void;
+    patternColors: PatternColor[];
+    setPatternColors: (colors: PatternColor[]) => void;
 };
 
 const ConfiguratorUiContext = createContext<ConfiguratorUiContextValue | null>(null);
@@ -57,6 +59,7 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
     const experienceRef = useRef<ExperienceInstance | null>(null);
     const [activeCameraView, setActiveCameraView] = useState("Right View");
     const [isModelLoading, setModelLoading] = useState(true);
+    const [patternColors, setPatternColors] = useState<PatternColor[]>([]);
 
     return (
         <ExperienceContext.Provider value={experienceRef}>
@@ -66,6 +69,8 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
                     setActiveCameraView,
                     isModelLoading,
                     setModelLoading,
+                    patternColors,
+                    setPatternColors,
                 }}
             >
                 {children}

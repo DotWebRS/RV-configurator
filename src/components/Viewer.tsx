@@ -13,8 +13,6 @@ const Viewer = () => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [cursorMode, setCursorMode] = useState("arrow");
     const [zoomPercent, setZoomPercent] = useState("100");
-    const [isPaletteOpen, setIsPaletteOpen] = useState(false);
-    const [patternColors, setPatternColors] = useState<PatternColor[]>([]);
     const scrollPosition = useRef(0);
     const zoomPercentRef = useRef("100");
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -23,6 +21,7 @@ const Viewer = () => {
         isModelLoading,
         setModelLoading,
         setActiveCameraView,
+        setPatternColors,
     } = useConfiguratorUi();
     const getActualZoomMaximum = () =>
         typeof window !== "undefined"
@@ -174,50 +173,6 @@ const Viewer = () => {
                     Drag to rotate
                 </span>
                 </div>
-
-            <div className="palette-control">
-                <button
-                    type="button"
-                    className={`palette-trigger ${isPaletteOpen ? "active" : ""}`}
-                    onClick={() => setIsPaletteOpen((open) => !open)}
-                    aria-expanded={isPaletteOpen}
-                    aria-controls="viewer-color-palette"
-                    disabled={isModelLoading || patternColors.length === 0}
-                >
-                    <span className="palette-icon" aria-hidden="true" />
-                    <span>Color palette</span>
-                </button>
-
-                {isPaletteOpen && patternColors.length > 0 && (
-                    <div
-                        id="viewer-color-palette"
-                        className="pattern-palette"
-                        aria-label="Pattern colors"
-                    >
-                        {patternColors.map((pattern) => (
-                            <label
-                                key={pattern.id}
-                                className="pattern-color"
-                                style={{ backgroundColor: pattern.color }}
-                                title={`Pattern ${pattern.id}: ${pattern.color}`}
-                            >
-                                <input
-                                    type="color"
-                                    value={pattern.color}
-                                    onChange={(event) => {
-                                        experienceRef.current?.setTextureColor(
-                                            pattern.id,
-                                            event.target.value,
-                                        );
-                                    }}
-                                    aria-label={`Change pattern ${pattern.id} color`}
-                                />
-                            </label>
-                        ))}
-                    </div>
-                )}
-            </div>
-
 
             <div className="view-badge">
                 <span className="view-number">360°</span>
