@@ -7,14 +7,15 @@ import { getModelConfiguration, type FloorPlan } from "./data";
 import "./UpgradeSteps.css";
 
 type Upgrade = { id: string; name: string; price: number; image: string };
+type PreviewItem = { name: string; image: string; price?: number };
 type ContactForm = { firstName: string; lastName: string; phone: string; state: string; email: string; serviceConsent: boolean; marketingConsent: boolean };
 
 /* Premešteno u data.ts; ostavljeno samo u istoriji verzija.
 */
 const legacyFloorPlans = [
     /* SaÄuvano za ponovno ukljuÄivanje Regent floor plan kartica:
-    { id: 1, name: "48FLB", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/regent/models/48FLB/Regent Hauler Flyer_48FLB_(10707)_V7-optimized-2k.glb" },
-    { id: 2, name: "49RH", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/regent/models/49RH/Regent Hauler Flyer_49RH_F10-optimized-2k-rotated.glb" },
+    { id: 1, name: "48FLB", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/Regent/models/48FLB/Regent Hauler Flyer_48FLB_(10707)_V7-optimized-2k.glb" },
+    { id: 2, name: "49RH", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/Regent/models/49RH/Regent Hauler Flyer_49RH_F10-optimized-2k-rotated.glb" },
     */
     { id: 3, name: "33EFS", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/Elegante/models/elegante test.glb" },
 ];
@@ -97,7 +98,7 @@ export default function RightPanel() {
     const [step, setStep] = useState(1);
     const [group, setGroup] = useState("Interior");
     const [selected, setSelected] = useState<Record<string, Upgrade>>({});
-    const [preview, setPreview] = useState<Upgrade | null>(null);
+    const [preview, setPreview] = useState<PreviewItem | null>(null);
     const [summaryOpen, setSummaryOpen] = useState(false);
     const [country, setCountry] = useState<CountryCode>("US");
     const [phoneTouched, setPhoneTouched] = useState(false);
@@ -180,7 +181,23 @@ export default function RightPanel() {
                 {floorPlans.map((plan) => <button key={plan.id} className={`floor-card ${selectedFloorPlanId === plan.id ? "active" : ""}`} onClick={() => choosePlan(plan)}>
                     <div className="floor-image"><img src={plan.image} alt={`${plan.name} floor plan`} />
                         {selectedFloorPlanId === plan.id && <img src="/icons/check-circle.png" className="check-icon" alt="Selected" />}
-                        <span className="zoom-button"><img src="/icons/zoom-in.png" alt="Zoom" /></span>
+                        <span
+                            className="zoom-button"
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Preview ${plan.name} floor plan`}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                setPreview({ name: `${plan.name} Floor Plan`, image: plan.image });
+                            }}
+                            onKeyDown={(event) => {
+                                if (event.key === "Enter" || event.key === " ") {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setPreview({ name: `${plan.name} Floor Plan`, image: plan.image });
+                                }
+                            }}
+                        ><img src="/icons/zoom-in.png" alt="Zoom" /></span>
                     </div>
                     <div className="floor-content"><h4>{plan.name}</h4><p>Height: {plan.height} / Length: {plan.length}</p><p>Width: {plan.width} / GVWR: {plan.gvwr}</p><p>Grey Water: {plan.grey}</p><p>Black Water: {plan.black}</p><p>Fresh Water: {plan.fresh}</p></div>
                 </button>)}
@@ -270,7 +287,7 @@ export default function RightPanel() {
         </aside>
 
         {preview && <div className="upgrade-modal" role="dialog" aria-modal="true" aria-label={preview.name} onMouseDown={(e) => e.target === e.currentTarget && setPreview(null)}>
-            <div className="upgrade-modal-card"><button className="modal-close" aria-label="Close preview" onClick={() => setPreview(null)}>×</button><img src={preview.image} alt={preview.name} /><div className="modal-caption"><strong>{preview.name}</strong><span>{preview.price ? `+${money(preview.price)}` : "Included"}</span></div></div>
+            <div className="upgrade-modal-card"><button className="modal-close" aria-label="Close preview" onClick={() => setPreview(null)}>×</button><img src={preview.image} alt={preview.name} /><div className="modal-caption"><strong>{preview.name}</strong>{preview.price !== undefined && <span>{preview.price ? `+${money(preview.price)}` : "Included"}</span>}</div></div>
         </div>}
     </>;
 }
