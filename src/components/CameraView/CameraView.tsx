@@ -1,11 +1,11 @@
 "use client";
 
 import { useRef } from "react";
-import { cameraViews } from "../data";
 import {
     useConfiguratorUi,
     useExperienceRef,
 } from "../../three/ExperienceContext";
+import { getFloorPlan, type RoomCamera } from "../data";
 
 
 const CameraView = () => {
@@ -16,11 +16,29 @@ const CameraView = () => {
         activeCameraView,
         setActiveCameraView,
         isModelLoading,
+        viewMode,
+        activeModelId,
+        selectedFloorPlanId,
     } = useConfiguratorUi();
+    const selectedPlan = getFloorPlan(activeModelId, selectedFloorPlanId);
+
+    const views = viewMode === "Interior"
+        ? [
+            { label: "Kitchen", image: "/images/interior option view mode/kitchen.jpg", camera: "kitchen", coordinates: selectedPlan?.rooms.kitchen },
+            { label: "Living area", image: "/images/interior option view mode/living.jpg", camera: "livingroom", coordinates: selectedPlan?.rooms.livingroom },
+            { label: "Bedroom", image: "/images/interior option view mode/bedroom.jpg", camera: "bedroom", coordinates: selectedPlan?.rooms.bedroom },
+            { label: "Bathroom", image: "/images/interior option view mode/bathroom.jpg", camera: "bathroom", coordinates: selectedPlan?.rooms.bathroom },
+        ]
+        : ["Front View", "Back View", "Left View", "Right View"].map((label) => ({
+            label,
+            image: "/images/card-image.png",
+            camera: label.split(" ")[0].toLowerCase(),
+            coordinates: undefined as RoomCamera | undefined,
+        }));
 
 
-    const handleCardClick = (view: string) => {
-        if (isModelLoading || activeCameraView === view) return;
+    const handleCardClick = (view: { label: string; camera: string; coordinates?: RoomCamera }) => {
+        if (isModelLoading || activeCameraView === view.label) return;
 
         const experience = experienceRef.current;
 
@@ -29,8 +47,8 @@ const CameraView = () => {
             return;
         }
 
-        setActiveCameraView(view);
-        experience.updateCameraView(view.split(" ")[0].toLowerCase());
+        setActiveCameraView(view.label);
+        experience.updateCameraView(view.camera, view.coordinates);
 
     };
 
@@ -79,24 +97,24 @@ const CameraView = () => {
 
                         {
 
-                            cameraViews.map((view) => (
+                            views.map((view) => (
 
                                 <div
                                     className={`camera-card ${
-                                        activeCameraView === view ? "active" : ""
+                                        activeCameraView === view.label ? "active" : ""
                                     }`}
-                                    key={view}
+                                    key={view.label}
                                     onClick={() => handleCardClick(view)}
                                 >
 
                                     <img
-                                        src="/images/card-image.png"
-                                        alt={view}
+                                        src={view.image}
+                                        alt={view.label}
                                     />
 
                                     <div className="camera-card-footer">
 
-                                        {view}
+                                        {view.label}
 
                                     </div>
 

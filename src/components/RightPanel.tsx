@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getCountries, getCountryCallingCode, parsePhoneNumberFromString, type CountryCode } from "libphonenumber-js";
 import { useConfiguratorUi, useExperienceRef } from "../three/ExperienceContext";
+import { getModelConfiguration, type FloorPlan } from "./data";
 import "./UpgradeSteps.css";
 
 type Upgrade = { id: string; name: string; price: number; image: string };
 type ContactForm = { firstName: string; lastName: string; phone: string; state: string; email: string; serviceConsent: boolean; marketingConsent: boolean };
 
-const floorPlans = [
+/* Premešteno u data.ts; ostavljeno samo u istoriji verzija.
+*/
+const legacyFloorPlans = [
     /* SaÄuvano za ponovno ukljuÄivanje Regent floor plan kartica:
     { id: 1, name: "48FLB", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/regent/models/48FLB/Regent Hauler Flyer_48FLB_(10707)_V7-optimized-2k.glb" },
     { id: 2, name: "49RH", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/regent/models/49RH/Regent Hauler Flyer_49RH_F10-optimized-2k-rotated.glb" },
@@ -54,33 +58,72 @@ const upgradeGroups: Record<string, Upgrade[]> = {
         ["see-level", "SeeLevel Monitoring", 475, "see-level-monitoring.webp"], ["weboost", "weBoost Drive X 5G", 850, "we-boost-antenna-drive-x-5g.jpg"],
         ["winegard", "Winegard 360 w/ 5G Gateway", 1100, "winegard-360-w-5g-gateway.jpg"],
     ].map(([id, name, price, file]) => ({ id, name, price, image: `/images/electronics/${file}` })) as Upgrade[],
+    Paint: [
+        { id: "paint-2-color-standard", name: "2 Color (Standard)", price: 0, image: "/images/paint/2-color-standard.webp" },
+        { id: "paint-velocity", name: "Velocity", price: 4400, image: "/images/paint/velocity-elite.webp" },
+        { id: "paint-3-color-elite", name: "3 Color (Elite)", price: 7400, image: "/images/paint/3-color-elite-standard.webp" },
+        { id: "paint-tsunami", name: "Tsunami", price: 10500, image: "/images/paint/tsunami-elite.webp" },
+    ],
 };
 
 const money = (value: number) => `$${value.toLocaleString("en-US")}`;
-const upgradeCategories = [...Object.keys(upgradeGroups), "Paint"];
+const upgradeCategories = Object.keys(upgradeGroups);
+const countryNames = new Intl.DisplayNames(["en"], { type: "region" });
+const countries = getCountries().map((code) => ({ code, name: countryNames.of(code) ?? code, dial: getCountryCallingCode(code) })).sort((a, b) => a.name.localeCompare(b.name));
+const countryFlag = (code: string) => String.fromCodePoint(...code.split("").map((letter) => 127397 + letter.charCodeAt(0)));
+
+function useAnimatedNumber(value: number, duration = 2000) {
+    const [displayed, setDisplayed] = useState(value);
+    const previous = useRef(value);
+    useEffect(() => {
+        const from = previous.current;
+        previous.current = value;
+        if (from === value) return;
+        const started = performance.now();
+        let frame = 0;
+        const tick = (now: number) => {
+            const progress = Math.min(1, (now - started) / duration);
+            const eased = progress < .5 ? 4 * progress ** 3 : 1 - ((-2 * progress + 2) ** 3) / 2;
+            setDisplayed(Math.round(from + (value - from) * eased));
+            if (progress < 1) frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(frame);
+    }, [duration, value]);
+    return displayed;
+}
 
 export default function RightPanel() {
     const [step, setStep] = useState(1);
-    const [selectedPlan, setSelectedPlan] = useState(3);
     const [group, setGroup] = useState("Interior");
     const [selected, setSelected] = useState<Record<string, Upgrade>>({});
     const [preview, setPreview] = useState<Upgrade | null>(null);
+    const [summaryOpen, setSummaryOpen] = useState(false);
+    const [country, setCountry] = useState<CountryCode>("US");
+    const [phoneTouched, setPhoneTouched] = useState(false);
     const [contact, setContact] = useState<ContactForm>({ firstName: "", lastName: "", phone: "", state: "", email: "", serviceConsent: false, marketingConsent: false });
     const tabsRef = useRef<HTMLDivElement | null>(null);
     const dragRef = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
     const experienceRef = useExperienceRef();
-    const { isModelLoading, setModelLoading, setActiveCameraView, patternColors } = useConfiguratorUi();
+    const { activeModelId, selectedFloorPlanId, setSelectedFloorPlanId, isModelLoading, setModelLoading, setActiveCameraView, setViewMode, patternColors } = useConfiguratorUi();
+    const activeModel = getModelConfiguration(activeModelId);
+    const floorPlans = activeModel.floorPlans;
+    const selectedPlan = floorPlans.find((plan) => plan.id === selectedFloorPlanId) ?? floorPlans[0];
     const upgradesTotal = useMemo(() => Object.values(selected).reduce((sum, item) => sum + item.price, 0), [selected]);
-    const basePrice = 176745;
+    const basePrice = activeModel.basePrice;
+    const animatedUpgradesTotal = useAnimatedNumber(upgradesTotal);
+    const animatedEstimatedTotal = useAnimatedNumber(basePrice + upgradesTotal);
+    const fullPhone = `+${getCountryCallingCode(country)}${contact.phone.replace(/\D/g, "")}`;
+    const isPhoneValid = !contact.phone || parsePhoneNumberFromString(fullPhone)?.isValid() === true;
     const buildConfiguration = useMemo(() => ({
-        model: "Luxe Elegante",
-        floorPlan: floorPlans.find((plan) => plan.id === selectedPlan)?.name ?? null,
+        model: activeModel.name,
+        floorPlan: selectedPlan?.name ?? null,
         basePrice,
         additionalOptions: Object.values(selected).map(({ id, name, price }) => ({ id, name, price })),
         selectedUpgradesTotal: upgradesTotal,
         estimatedTotal: basePrice + upgradesTotal,
         colors: Object.fromEntries(patternColors.map((pattern, index) => [`color${index + 1}`, pattern.color])),
-    }), [patternColors, selected, selectedPlan, upgradesTotal]);
+    }), [activeModel.name, basePrice, patternColors, selected, selectedPlan?.name, upgradesTotal]);
 
     const updateContact = <K extends keyof ContactForm>(key: K, value: ContactForm[K]) => setContact((current) => ({ ...current, [key]: value }));
 
@@ -90,11 +133,12 @@ export default function RightPanel() {
         return () => window.removeEventListener("keydown", onKey);
     }, []);
 
-    const choosePlan = async (plan: (typeof floorPlans)[number]) => {
-        if (isModelLoading || selectedPlan === plan.id) return;
+    const choosePlan = async (plan: FloorPlan) => {
+        if (isModelLoading || selectedFloorPlanId === plan.id) return;
         const experience = experienceRef.current;
         if (!experience) return;
-        setSelectedPlan(plan.id);
+        setSelectedFloorPlanId(plan.id);
+        setViewMode("Exterior");
         setActiveCameraView("Right View");
         experience.updateCameraView("right");
         setModelLoading(true);
@@ -103,32 +147,46 @@ export default function RightPanel() {
 
     const toggleUpgrade = (item: Upgrade) => setSelected((current) => {
         const next = { ...current };
-        if (next[item.id]) delete next[item.id]; else next[item.id] = item;
+        if (next[item.id]) delete next[item.id];
+        else {
+            if (item.id.startsWith("paint-")) Object.keys(next).filter((id) => id.startsWith("paint-")).forEach((id) => delete next[id]);
+            next[item.id] = item;
+        }
         return next;
     });
 
     return <>
         <aside className={`right-panel step-${step}`}>
             <script id="build-configuration" type="application/json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildConfiguration).replace(/</g, "\\u003c") }} />
-            <h2 className="right-title">Customize Your Luxe Toy Hauler</h2>
-            {step < 3 && <p className="right-step"><strong>Step {step}:</strong> {step === 1 ? "select the Floor Plan" : "Select interior and exterior upgrades"}</p>}
-            {step < 3 && <div className="right-buttons">
+            <h2 className="right-title">{summaryOpen ? "Your Selected Upgrades" : `Customize Your ${activeModel.name}`}</h2>
+            {summaryOpen && <div className="summary-details">
+                <button type="button" className="summary-back" onClick={() => setSummaryOpen(false)}>← Back</button>
+                <div className="summary-details-list">
+                    {Object.values(selected).length ? Object.values(selected).map((item) => <div className="summary-detail-item" key={item.id}>
+                        <img src={item.image} alt="" />
+                        <span><strong>{item.name}</strong><small>{money(item.price)}</small></span>
+                    </div>) : <p className="summary-empty">No upgrades selected yet.</p>}
+                </div>
+                <div className="summary-detail-total"><span>Selected Upgrades</span><strong>{money(animatedUpgradesTotal)}</strong></div>
+            </div>}
+            {!summaryOpen && step < 3 && <p className="right-step"><strong>Step {step}:</strong> {step === 1 ? "select the Floor Plan" : "Select interior and exterior upgrades"}</p>}
+            {!summaryOpen && step < 3 && <div className="right-buttons">
                 <button className="step-button" disabled={step === 1} onClick={() => setStep((s) => Math.max(1, s - 1))}>Previous</button>
                 <button className="step-button" onClick={() => setStep((s) => Math.min(3, s + 1))}>Next</button>
             </div>}
-            {step < 3 && <div className="right-divider" />}
+            {!summaryOpen && step < 3 && <div className="right-divider" />}
 
-            {step === 1 && <div className="floorplan-container">
-                {floorPlans.map((plan) => <button key={plan.id} className={`floor-card ${selectedPlan === plan.id ? "active" : ""}`} onClick={() => choosePlan(plan)}>
-                    <div className="floor-image"><img src="/images/floor-plan.jpg" alt={`${plan.name} floor plan`} />
-                        {selectedPlan === plan.id && <img src="/icons/check-circle.png" className="check-icon" alt="Selected" />}
+            {!summaryOpen && step === 1 && <div className="floorplan-container">
+                {floorPlans.map((plan) => <button key={plan.id} className={`floor-card ${selectedFloorPlanId === plan.id ? "active" : ""}`} onClick={() => choosePlan(plan)}>
+                    <div className="floor-image"><img src={plan.image} alt={`${plan.name} floor plan`} />
+                        {selectedFloorPlanId === plan.id && <img src="/icons/check-circle.png" className="check-icon" alt="Selected" />}
                         <span className="zoom-button"><img src="/icons/zoom-in.png" alt="Zoom" /></span>
                     </div>
                     <div className="floor-content"><h4>{plan.name}</h4><p>Height: {plan.height} / Length: {plan.length}</p><p>Width: {plan.width} / GVWR: {plan.gvwr}</p><p>Grey Water: {plan.grey}</p><p>Black Water: {plan.black}</p><p>Fresh Water: {plan.fresh}</p></div>
                 </button>)}
             </div>}
 
-            {step === 2 && <div className="upgrades-section">
+            {!summaryOpen && step === 2 && <div className="upgrades-section">
                 <div
                     ref={tabsRef}
                     className="upgrade-tabs"
@@ -155,14 +213,16 @@ export default function RightPanel() {
                 >
                     {upgradeCategories.map((name) => <button key={name} role="tab" aria-selected={group === name} className={group === name ? "active" : ""} onClick={() => { if (!dragRef.current.moved) setGroup(name); dragRef.current.moved = false; }}>{name}</button>)}
                 </div>
-                {group !== "Paint" ? <div className="upgrade-grid">
+                <div className="upgrade-grid">
                     {upgradeGroups[group].map((item) => <div key={item.id} role="button" tabIndex={0} className={`upgrade-card ${selected[item.id] ? "selected" : ""}`} onClick={() => toggleUpgrade(item)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggleUpgrade(item); } }}>
                         <span className="upgrade-image"><img src={item.image} alt={item.name} />{selected[item.id] && <img src="/icons/check-circle.png" className="check-icon" alt="Selected" />}
                             <span className="zoom-button" role="button" aria-label={`Preview ${item.name}`} onClick={(event) => { event.stopPropagation(); setPreview(item); }}><img src="/icons/zoom-in.png" alt="" /></span>
                         </span>
                         <span className="upgrade-copy"><strong>{item.name}</strong><span>{item.price ? `+${money(item.price)}` : "Included"}</span></span>
                     </div>)}
-                </div> : <div className="paint-panel">
+                </div>
+                {/* Color picker je privremeno isključen i sačuvan za ponovno uključivanje.
+                {group === "Paint" && <div className="paint-panel">
                     <h3>Exterior Paint</h3>
                     <p>Select a color to customize the paint pattern.</p>
                     {patternColors.length > 0 ? <div className="paint-swatches" aria-label="Pattern colors">
@@ -171,17 +231,26 @@ export default function RightPanel() {
                         </label>)}
                     </div> : <p className="paint-empty">Paint colors will be available when the model finishes loading.</p>}
                 </div>}
+                */}
             </div>}
 
-            {step === 3 && <form className="contact-form" onSubmit={(event) => event.preventDefault()}>
-                <div className="step3-model-summary"><strong>Luxe Toy Hauler</strong><span><small>Total</small>{money(buildConfiguration.estimatedTotal)}</span></div>
+            {!summaryOpen && step === 3 && <form className="contact-form" onSubmit={(event) => event.preventDefault()}>
+                <div className="step3-model-summary"><strong>{activeModel.name}</strong><span><small>Total</small>{money(buildConfiguration.estimatedTotal)}</span></div>
                 <div className="step3-divider" />
                 <h3>Ready to Take the Next Step?</h3>
                 <p className="form-intro">Fill out the form below to receive exclusive updates, event reminders, and personalized assistance</p>
                 <div className="form-fields">
                     <label>First name *<input required value={contact.firstName} onChange={(event) => updateContact("firstName", event.target.value)} placeholder="First name" /></label>
                     <label>Last name *<input required value={contact.lastName} onChange={(event) => updateContact("lastName", event.target.value)} placeholder="Last name" /></label>
-                    <label className="form-wide">Phone number<div className="phone-field"><select aria-label="Country code" defaultValue="US"><option value="US">US</option></select><input type="tel" value={contact.phone} onChange={(event) => updateContact("phone", event.target.value)} placeholder="+1 (555) 000-0000" /></div></label>
+                    <label className="form-wide">Phone number
+                        <div className={`phone-field ${phoneTouched && !isPhoneValid ? "invalid" : ""}`}>
+                            <select aria-label="Country and calling code" value={country} onChange={(event) => { setCountry(event.target.value as CountryCode); setPhoneTouched(true); }}>
+                                {countries.map((item) => <option key={item.code} value={item.code}>{countryFlag(item.code)} {item.code} (+{item.dial})</option>)}
+                            </select>
+                            <input type="tel" value={contact.phone} onBlur={() => setPhoneTouched(true)} onChange={(event) => updateContact("phone", event.target.value)} placeholder="Phone number" aria-invalid={phoneTouched && !isPhoneValid} />
+                        </div>
+                        {phoneTouched && !isPhoneValid && <small className="phone-error">Enter a valid phone number for the selected country.</small>}
+                    </label>
                     <label className="form-wide">State/Province<select value={contact.state} onChange={(event) => updateContact("state", event.target.value)}><option value="">Select</option><option>Alabama</option><option>Alaska</option><option>Arizona</option><option>California</option><option>Florida</option><option>New York</option><option>Texas</option><option>Other</option></select></label>
                     <label className="form-wide">Email *<input required type="email" value={contact.email} onChange={(event) => updateContact("email", event.target.value)} placeholder="you@mail.com" /></label>
                 </div>
@@ -190,12 +259,12 @@ export default function RightPanel() {
                 <div className="form-actions"><button type="button" className="form-previous" onClick={() => setStep(2)}>Previous</button><button type="submit" className="form-send">Send My Build</button></div>
             </form>}
 
-            {step < 3 && <div className="build-summary">
+            {!summaryOpen && step < 3 && <div className="build-summary">
                 <h3>Build Summary</h3>
                 <div className="summary-row"><span>Base Price</span><span>{money(basePrice)}</span></div>
-                <div className="summary-row"><span>Selected Upgrades</span><span>{money(upgradesTotal)}</span></div>
-                <div className="summary-row total"><span>Estimated Total</span><span>{money(basePrice + upgradesTotal)}</span></div><hr />
-                <div className="summary-header"><span>Selected Items ({Object.keys(selected).length})</span><button className="view-all" onClick={() => setStep(3)}>View all</button></div>
+                <div className="summary-row"><span>Selected Upgrades</span><span aria-live="polite">{money(animatedUpgradesTotal)}</span></div>
+                <div className="summary-row total"><span>Estimated Total</span><span aria-live="polite">{money(animatedEstimatedTotal)}</span></div><hr />
+                <div className="summary-header"><span>Selected Items ({Object.keys(selected).length})</span><button className="view-all" onClick={() => setSummaryOpen(true)}>View more</button></div>
                 <div className="summary-buttons"><button className="review-button">Review Build</button><button className="send-button" onClick={() => setStep(3)}>Send My Build</button></div>
             </div>}
         </aside>

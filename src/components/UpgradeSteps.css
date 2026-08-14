@@ -57,9 +57,22 @@
 .form-fields input,.form-fields select { width:100%; height:40px; box-sizing:border-box; border:1px solid #373A41; border-radius:7px; outline:none; padding:0 12px; background:#071528; color:#F7F7F7; font:13px var(--font-open-sans); }
 .form-fields input::placeholder { color:#61656C; }
 .form-fields input:focus,.form-fields select:focus { border-color:#697586; }
-.phone-field { display:grid; grid-template-columns:62px minmax(0,1fr); }
+.phone-field { display:grid; grid-template-columns:minmax(150px,44%) minmax(0,1fr); }
 .phone-field select { border-right:0; border-radius:7px 0 0 7px; padding-inline:9px; }
 .phone-field input { border-radius:0 7px 7px 0; }
+.phone-field.invalid select,.phone-field.invalid input { border-color:#f97066; }
+.phone-error { color:#f97066; font-size:11px; }
+.summary-details { min-height:0; flex:1; display:flex; flex-direction:column; padding:4px 24px 20px; color:#f7f7f7; }
+.summary-back { align-self:flex-start; margin:0 0 16px; padding:8px 0; border:0; background:transparent; color:#b3b8db; font:600 14px var(--font-open-sans); cursor:pointer; }
+.summary-details-list { min-height:0; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; scrollbar-width:none; }
+.summary-details-list::-webkit-scrollbar { display:none; }
+.summary-detail-item { display:grid; grid-template-columns:64px minmax(0,1fr); gap:12px; align-items:center; padding:8px; border:1px solid #373a41; border-radius:8px; background:#08182d; }
+.summary-detail-item img { width:64px; height:52px; border-radius:6px; object-fit:cover; }
+.summary-detail-item span { min-width:0; display:flex; flex-direction:column; gap:4px; }
+.summary-detail-item strong { overflow:hidden; color:#f7f7f7; font-size:13px; text-overflow:ellipsis; white-space:nowrap; }
+.summary-detail-item small { color:#b3b8db; font-size:12px; }
+.summary-empty { color:#94979c; }
+.summary-detail-total { display:flex; justify-content:space-between; gap:16px; margin-top:16px; padding-top:16px; border-top:1px solid #373a41; font-size:15px; }
 .consent-row { display:grid; grid-template-columns:18px minmax(0,1fr); gap:10px; align-items:start; margin-top:14px; color:#CECFD2; font-size:11px; line-height:1.35; cursor:pointer; }
 .consent-row input { appearance:none; width:16px; height:16px; margin:1px 0 0; border:1px solid #373A41; border-radius:5px; background:#071528; }
 .consent-row input:checked { background:#264064 url('/icons/check-circle.png') center/14px no-repeat; }
