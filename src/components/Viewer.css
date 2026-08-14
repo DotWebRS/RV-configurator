@@ -255,6 +255,12 @@
 
 }
 
+.zoom-btn:disabled,
+.zoom-input:disabled {
+    cursor: not-allowed;
+    opacity: .35;
+}
+
 .zoom-input {
 
     width: 28px;

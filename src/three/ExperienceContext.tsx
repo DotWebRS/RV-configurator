@@ -14,6 +14,7 @@ export type ExperienceInstance = {
     unloadWorld: () => void;
     reloadWorld: (sources?: unknown[]) => void;
     updateCameraView: (view: string, coordinates?: { cameraPosition: [number, number, number]; target: [number, number, number] }) => void;
+    setCameraInteractionMode: (mode: "Interior" | "Exterior") => void;
     setZoomPercent: (percent: number) => void;
     getZoomPercent: () => number;
     onZoomChange: (callback: (percent: number) => void) => () => void;

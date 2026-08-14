@@ -46,6 +46,9 @@ export default class Experience{
     updateCameraView(view, coordinates){
         this.camera.updateCameraView(view, coordinates);
     }
+    setCameraInteractionMode(mode){
+        this.camera.setInteractionMode(mode);
+    }
     setZoomPercent(percent){
         this.camera.setZoomPercent(percent);
     }

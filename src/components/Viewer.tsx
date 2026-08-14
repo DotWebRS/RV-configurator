@@ -22,6 +22,7 @@ const Viewer = () => {
         setModelLoading,
         setActiveCameraView,
         setPatternColors,
+        viewMode,
     } = useConfiguratorUi();
     const getActualZoomMaximum = () =>
         typeof window !== "undefined"
@@ -37,6 +38,7 @@ const Viewer = () => {
 
     };
     const applyZoomPercent = (value: number) => {
+        if (viewMode === "Interior") return;
         const nextPercent = Math.min(100, Math.max(0, value));
         setZoomPercent(String(Math.round(nextPercent)));
         experienceRef.current?.setZoomPercent(displayToActualZoom(nextPercent));
@@ -235,6 +237,7 @@ const Viewer = () => {
             <div className="zoom-controls">
                 <button
                     className="zoom-btn"
+                    disabled={viewMode === "Interior"}
                     onClick={() => changeZoomBy(-5)}
                     aria-label="Smanji zoom za 5%"
                 >
@@ -249,6 +252,7 @@ const Viewer = () => {
                         max="100"
                         step="5"
                         value={zoomPercent}
+                        disabled={viewMode === "Interior"}
                         onChange={(event) => {
                             const value = event.target.value;
                             setZoomPercent(value);
@@ -277,6 +281,7 @@ const Viewer = () => {
 
                 <button
                     className="zoom-btn"
+                    disabled={viewMode === "Interior"}
                     onClick={() => changeZoomBy(5)}
                     aria-label="Povećaj zoom za 5%"
                 >

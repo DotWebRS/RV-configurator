@@ -23,6 +23,7 @@ const ViewMode = () => {
         if (isModelLoading) return;
         const mode = viewModes[index].label as "Interior" | "Exterior";
         setViewMode(mode);
+        experienceRef.current?.setCameraInteractionMode(mode);
         const initialView = mode === "Interior" ? "Kitchen" : "Right View";
         setActiveCameraView(initialView);
         const kitchenCoordinates = getFloorPlan(activeModelId, selectedFloorPlanId)?.rooms.kitchen;

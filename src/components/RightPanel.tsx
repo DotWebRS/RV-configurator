@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { getCountries, getCountryCallingCode, parsePhoneNumberFromString, type CountryCode } from "libphonenumber-js";
 import { useConfiguratorUi, useExperienceRef } from "../three/ExperienceContext";
 import { getModelConfiguration, type FloorPlan } from "./data";
@@ -102,8 +102,10 @@ export default function RightPanel() {
     const [summaryOpen, setSummaryOpen] = useState(false);
     const [country, setCountry] = useState<CountryCode>("US");
     const [phoneTouched, setPhoneTouched] = useState(false);
+    const [preparedPayload, setPreparedPayload] = useState<Record<string, unknown> | null>(null);
     const [contact, setContact] = useState<ContactForm>({ firstName: "", lastName: "", phone: "", state: "", email: "", serviceConsent: false, marketingConsent: false });
     const tabsRef = useRef<HTMLDivElement | null>(null);
+    const phoneRef = useRef<HTMLInputElement | null>(null);
     const dragRef = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
     const experienceRef = useExperienceRef();
     const { activeModelId, selectedFloorPlanId, setSelectedFloorPlanId, isModelLoading, setModelLoading, setActiveCameraView, setViewMode, patternColors } = useConfiguratorUi();
@@ -115,7 +117,7 @@ export default function RightPanel() {
     const animatedUpgradesTotal = useAnimatedNumber(upgradesTotal);
     const animatedEstimatedTotal = useAnimatedNumber(basePrice + upgradesTotal);
     const fullPhone = `+${getCountryCallingCode(country)}${contact.phone.replace(/\D/g, "")}`;
-    const isPhoneValid = !contact.phone || parsePhoneNumberFromString(fullPhone)?.isValid() === true;
+    const isPhoneValid = contact.phone.trim().length > 0 && parsePhoneNumberFromString(fullPhone)?.isValid() === true;
     const buildConfiguration = useMemo(() => ({
         model: activeModel.name,
         floorPlan: selectedPlan?.name ?? null,
@@ -126,7 +128,10 @@ export default function RightPanel() {
         colors: Object.fromEntries(patternColors.map((pattern, index) => [`color${index + 1}`, pattern.color])),
     }), [activeModel.name, basePrice, patternColors, selected, selectedPlan?.name, upgradesTotal]);
 
-    const updateContact = <K extends keyof ContactForm>(key: K, value: ContactForm[K]) => setContact((current) => ({ ...current, [key]: value }));
+    const updateContact = <K extends keyof ContactForm>(key: K, value: ContactForm[K]) => {
+        setPreparedPayload(null);
+        setContact((current) => ({ ...current, [key]: value }));
+    };
 
     useEffect(() => {
         const onKey = (event: KeyboardEvent) => event.key === "Escape" && setPreview(null);
@@ -134,12 +139,68 @@ export default function RightPanel() {
         return () => window.removeEventListener("keydown", onKey);
     }, []);
 
+    useEffect(() => {
+        phoneRef.current?.setCustomValidity(
+            contact.phone && !isPhoneValid
+                ? "Enter a valid phone number for the selected country."
+                : "",
+        );
+    }, [contact.phone, country, isPhoneValid]);
+
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setPhoneTouched(true);
+
+        if (!event.currentTarget.checkValidity() || !isPhoneValid) {
+            event.currentTarget.reportValidity();
+            return;
+        }
+
+        const selectedByCategory = Object.fromEntries(
+            Object.entries(upgradeGroups)
+                .map(([category, items]) => [
+                    category,
+                    items
+                        .filter((item) => selected[item.id])
+                        .map(({ id, name, price }) => ({ id, name, price })),
+                ])
+                .filter(([, items]) => (items as Upgrade[]).length > 0),
+        );
+
+        const luxeBuildConfiguration = {
+            model: activeModel.name,
+            floorPlan: selectedPlan?.name ?? null,
+            basePrice,
+            selectedUpgradesTotal: upgradesTotal,
+            totalPrice: basePrice + upgradesTotal,
+            selectedOptions: selectedByCategory,
+        };
+        const payload = {
+            data: [{
+                First_Name: contact.firstName.trim(),
+                Last_Name: contact.lastName.trim(),
+                Email: contact.email.trim(),
+                Phone: fullPhone,
+                State: contact.state,
+                Lead_Source: "Luxe Build Your Own",
+                Service_Consent: contact.serviceConsent,
+                Marketing_Consent: contact.marketingConsent,
+                Luxe_Build_Configuration: luxeBuildConfiguration,
+            }],
+            duplicate_check_fields: ["Email", "Phone"],
+        };
+
+        setPreparedPayload(payload);
+        console.log("Prepared Send My Build payload:", payload);
+    };
+
     const choosePlan = async (plan: FloorPlan) => {
         if (isModelLoading || selectedFloorPlanId === plan.id) return;
         const experience = experienceRef.current;
         if (!experience) return;
         setSelectedFloorPlanId(plan.id);
         setViewMode("Exterior");
+        experience.setCameraInteractionMode("Exterior");
         setActiveCameraView("Right View");
         experience.updateCameraView("right");
         setModelLoading(true);
@@ -159,6 +220,7 @@ export default function RightPanel() {
     return <>
         <aside className={`right-panel step-${step}`}>
             <script id="build-configuration" type="application/json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildConfiguration).replace(/</g, "\\u003c") }} />
+            {preparedPayload && <script id="lead-payload" type="application/json" dangerouslySetInnerHTML={{ __html: JSON.stringify(preparedPayload).replace(/</g, "\\u003c") }} />}
             <h2 className="right-title">{summaryOpen ? "Your Selected Upgrades" : `Customize Your ${activeModel.name}`}</h2>
             {summaryOpen && <div className="summary-details">
                 <button type="button" className="summary-back" onClick={() => setSummaryOpen(false)}>← Back</button>
@@ -251,29 +313,30 @@ export default function RightPanel() {
                 */}
             </div>}
 
-            {!summaryOpen && step === 3 && <form className="contact-form" onSubmit={(event) => event.preventDefault()}>
+            {!summaryOpen && step === 3 && <form className="contact-form" onSubmit={handleSubmit}>
                 <div className="step3-model-summary"><strong>{activeModel.name}</strong><span><small>Total</small>{money(buildConfiguration.estimatedTotal)}</span></div>
                 <div className="step3-divider" />
                 <h3>Ready to Take the Next Step?</h3>
                 <p className="form-intro">Fill out the form below to receive exclusive updates, event reminders, and personalized assistance</p>
                 <div className="form-fields">
-                    <label>First name *<input required value={contact.firstName} onChange={(event) => updateContact("firstName", event.target.value)} placeholder="First name" /></label>
-                    <label>Last name *<input required value={contact.lastName} onChange={(event) => updateContact("lastName", event.target.value)} placeholder="Last name" /></label>
-                    <label className="form-wide">Phone number
+                    <label>First name *<input required pattern=".*\S.*" title="Enter your first name." value={contact.firstName} onChange={(event) => updateContact("firstName", event.target.value)} placeholder="First name" /></label>
+                    <label>Last name *<input required pattern=".*\S.*" title="Enter your last name." value={contact.lastName} onChange={(event) => updateContact("lastName", event.target.value)} placeholder="Last name" /></label>
+                    <label className="form-wide">Phone number *
                         <div className={`phone-field ${phoneTouched && !isPhoneValid ? "invalid" : ""}`}>
-                            <select aria-label="Country and calling code" value={country} onChange={(event) => { setCountry(event.target.value as CountryCode); setPhoneTouched(true); }}>
+                            <select aria-label="Country and calling code" value={country} onChange={(event) => { setCountry(event.target.value as CountryCode); setPhoneTouched(true); setPreparedPayload(null); }}>
                                 {countries.map((item) => <option key={item.code} value={item.code}>{countryFlag(item.code)} {item.code} (+{item.dial})</option>)}
                             </select>
-                            <input type="tel" value={contact.phone} onBlur={() => setPhoneTouched(true)} onChange={(event) => updateContact("phone", event.target.value)} placeholder="Phone number" aria-invalid={phoneTouched && !isPhoneValid} />
+                            <input ref={phoneRef} required type="tel" value={contact.phone} onBlur={() => setPhoneTouched(true)} onChange={(event) => updateContact("phone", event.target.value)} placeholder="Phone number" aria-invalid={phoneTouched && !isPhoneValid} />
                         </div>
                         {phoneTouched && !isPhoneValid && <small className="phone-error">Enter a valid phone number for the selected country.</small>}
                     </label>
-                    <label className="form-wide">State/Province<select value={contact.state} onChange={(event) => updateContact("state", event.target.value)}><option value="">Select</option><option>Alabama</option><option>Alaska</option><option>Arizona</option><option>California</option><option>Florida</option><option>New York</option><option>Texas</option><option>Other</option></select></label>
+                    <label className="form-wide">State/Province *<select required value={contact.state} onChange={(event) => updateContact("state", event.target.value)}><option value="">Select</option><option>Alabama</option><option>Alaska</option><option>Arizona</option><option>California</option><option>Florida</option><option>New York</option><option>Texas</option><option>Other</option></select></label>
                     <label className="form-wide">Email *<input required type="email" value={contact.email} onChange={(event) => updateContact("email", event.target.value)} placeholder="you@mail.com" /></label>
                 </div>
                 <label className="consent-row"><input type="checkbox" checked={contact.serviceConsent} onChange={(event) => updateContact("serviceConsent", event.target.checked)} /><span>I consent to receive text messages about appointment reminders, account notifications, and relevant information from Luxe Fifth Wheels at the phone number I provided. I acknowledge that my consent is not a condition of purchase. Msg &amp; data rates may apply. Msg frequency varies. Reply HELP for assistance or STOP to opt out of receiving messages. Privacy Policy &amp; Terms &amp; Conditions .</span></label>
                 <label className="consent-row"><input type="checkbox" checked={contact.marketingConsent} onChange={(event) => updateContact("marketingConsent", event.target.checked)} /><span>I consent to receive marketing text messages, such as promotional offers, discounts, and sales events from Luxe Fifth Wheels at the number I provided, including messages sent via auto dialer. I understand that my consent is not a condition of purchase. Msg &amp; data rates may apply. Msg frequency varies. Reply HELP for assistance or STOP to opt out of receiving messages. Privacy Policy &amp; Terms &amp; Conditions .</span></label>
                 <div className="form-actions"><button type="button" className="form-previous" onClick={() => setStep(2)}>Previous</button><button type="submit" className="form-send">Send My Build</button></div>
+                {preparedPayload && <p className="form-payload-ready" role="status">Build payload prepared successfully.</p>}
             </form>}
 
             {!summaryOpen && step < 3 && <div className="build-summary">

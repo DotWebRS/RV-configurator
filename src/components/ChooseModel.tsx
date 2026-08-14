@@ -25,6 +25,7 @@ const ChooseModel = () => {
         setActiveModelId(model.id);
         setSelectedFloorPlanId(firstPlan.id);
         setViewMode("Exterior");
+        experience.setCameraInteractionMode("Exterior");
         setActiveCameraView("Right View");
         experience.updateCameraView("right");
         setModelLoading(true);

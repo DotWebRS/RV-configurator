@@ -68,6 +68,8 @@ export default class Camera{
         
         this.setInstance();
         this.setOrbitControls();
+        this.interactionMode = "Exterior";
+        this.setInteractionMode(this.interactionMode);
         this.activeView = "right";
     }
 
@@ -79,17 +81,43 @@ export default class Camera{
     setOrbitControls(){
         this.controls = new OrbitControls(this.instance, this.canvas);
         this.controls.target.set(this.positions.right.target.x, this.positions.right.target.y, this.positions.right.target.z);
+        this.controls.enabled = true;
+        this.controls.enableRotate = true;
         // Privremeno uklonjeno radi izvlačenja koordinata kamere:
         // this.controls.enablePan = false;
-        this.controls.enablePan = true;
+        this.controls.enablePan = false;
         this.controls.enableDamping = true;
         // Originalna ograničenja zumiranja, sačuvana za ponovno uključivanje:
         // this.controls.minDistance = this.zoomSettings.minDistance;
         // this.controls.maxDistance = this.zoomSettings.maxDistance;
-        this.controls.minDistance = 0.01;
-        this.controls.maxDistance = Infinity;
+        this.controls.minDistance = this.zoomSettings.minDistance;
+        this.controls.maxDistance = this.zoomSettings.maxDistance;
         this.controls.minPolarAngle = Math.PI/2.5;
         this.controls.maxPolarAngle = Math.PI / 2;
+    }
+    setInteractionMode(mode){
+        if (!this.controls) return;
+
+        this.interactionMode = mode;
+        this.controls.enabled = true;
+        this.controls.enableRotate = true;
+        this.controls.enablePan = false;
+
+        if (mode === "Interior") {
+            this.controls.enableZoom = false;
+            this.controls.minDistance = 0;
+            this.controls.maxDistance = Infinity;
+            this.controls.minPolarAngle = 0;
+            this.controls.maxPolarAngle = Math.PI;
+        } else {
+            this.controls.enableZoom = true;
+            this.controls.minDistance = this.zoomSettings.minDistance;
+            this.controls.maxDistance = this.zoomSettings.maxDistance;
+            this.controls.minPolarAngle = Math.PI / 2.5;
+            this.controls.maxPolarAngle = Math.PI / 2;
+        }
+
+        this.controls.update();
     }
     resize(){
         this.instance.aspect = this.sizes.width / this.sizes.height;
@@ -229,7 +257,7 @@ export default class Camera{
         });
     }
     setZoomPercent(percent) {
-        if (!this.instance || !this.controls) {
+        if (!this.instance || !this.controls || this.interactionMode === "Interior") {
             return;
         }
 
@@ -307,5 +335,6 @@ export default class Camera{
         this.onDebugClick = null;
         this.viewTimeline = null;
         this.activeView = null;
+        this.interactionMode = null;
     }
 }
