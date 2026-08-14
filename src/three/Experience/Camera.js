@@ -7,8 +7,8 @@ export default class Camera{
     constructor(){
         this.experience = new Experience();
         this.onDebugClick = () => {
-            console.log(this.instance.position);
-            console.log(this.controls.target);
+            console.log(`${Math.round((this.instance.position.x + Number.EPSILON) * 100) / 100}, ${Math.round((this.instance.position.y + Number.EPSILON) * 100) / 100}, ${Math.round((this.instance.position.z + Number.EPSILON) * 100) / 100}`);
+            console.log(`${Math.round((this.controls.target.x + Number.EPSILON) * 100) / 100}, ${Math.round((this.controls.target.y + Number.EPSILON) * 100) / 100}, ${Math.round((this.controls.target.z + Number.EPSILON) * 100) / 100}`);
             console.log(this.instance);
             console.log(this.controls);
         };
