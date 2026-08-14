@@ -9,7 +9,9 @@ import {
 import draco3d from "draco3dgltf";
 import sharp from "sharp";
 
-const MAX_TEXTURE_SIZE = 2048;
+const DEFAULT_TEXTURE_SIZE = 2048;
+const MIN_TEXTURE_SIZE = 64;
+const MAX_TEXTURE_SIZE = 16384;
 const DEFAULT_ID_MASK_COLOR_COUNT = 8;
 const MAX_ID_MASK_COLOR_COUNT = 255;
 const ID_MASK_EXTENSION = "EXT_mesh_features";
@@ -20,23 +22,48 @@ const PROJECT_ROOT = path.resolve(SCRIPT_DIR, "..");
 const INPUT_DIR = path.join(PROJECT_ROOT, "model-optimization", "input");
 const OUTPUT_DIR = path.join(PROJECT_ROOT, "model-optimization", "output");
 
-function getIdMaskColorCount() {
-  const argument = process.argv.find((value) => value.startsWith("--id-colors="));
-  const requested = argument
-    ? Number.parseInt(argument.split("=")[1], 10)
-    : DEFAULT_ID_MASK_COLOR_COUNT;
+function getOptionValue(name) {
+  const prefix = `--${name}=`;
+  const argument = process.argv.slice(2).find((value) => value.startsWith(prefix));
+  return argument?.slice(prefix.length);
+}
 
-  if (
-    !Number.isInteger(requested)
-    || requested < 1
-    || requested > MAX_ID_MASK_COLOR_COUNT
-  ) {
-    throw new Error(
-      `--id-colors mora biti ceo broj između 1 i ${MAX_ID_MASK_COLOR_COUNT}.`,
-    );
+function getIntegerOption(name, defaultValue, minimum, maximum) {
+  const value = getOptionValue(name);
+  const requested = value === undefined || !/^\d+$/.test(value)
+    ? (value === undefined ? defaultValue : Number.NaN)
+    : Number.parseInt(value, 10);
+
+  if (!Number.isInteger(requested) || requested < minimum || requested > maximum) {
+    throw new Error(`--${name} mora biti ceo broj izmeÄ‘u ${minimum} i ${maximum}.`);
   }
 
   return requested;
+}
+
+function getOptions() {
+  const args = new Set(process.argv.slice(2));
+  const masksValue = getOptionValue("masks");
+
+  if (args.has("--masks") && args.has("--no-masks")) {
+    throw new Error("Koristi samo jednu opciju: --masks ili --no-masks.");
+  }
+
+  let createMasks = !args.has("--no-masks");
+  if (args.has("--masks")) createMasks = true;
+
+  if (masksValue !== undefined) {
+    if (masksValue !== "true" && masksValue !== "false") {
+      throw new Error("--masks prihvata samo true ili false.");
+    }
+    createMasks = masksValue === "true";
+  }
+
+  return {
+    createMasks,
+    textureSize: getIntegerOption("texture-size", DEFAULT_TEXTURE_SIZE, MIN_TEXTURE_SIZE, MAX_TEXTURE_SIZE),
+    idMaskColorCount: getIntegerOption("id-colors", DEFAULT_ID_MASK_COLOR_COUNT, 1, MAX_ID_MASK_COLOR_COUNT),
+  };
 }
 
 async function findGlbFiles(directory) {
@@ -56,18 +83,26 @@ async function findGlbFiles(directory) {
   return files.sort((a, b) => a.localeCompare(b));
 }
 
-function getOutputPath(inputPath) {
+function getTextureSizeLabel(textureSize) {
+  return textureSize % 1024 === 0
+    ? `${textureSize / 1024}k`
+    : `${textureSize}px`;
+}
+
+function getOutputPath(inputPath, textureSize) {
   const relativePath = path.relative(INPUT_DIR, inputPath);
   const parsedPath = path.parse(relativePath);
-  const outputName = parsedPath.name.includes("-optimized-2k")
-    ? parsedPath.name
-    : `${parsedPath.name}-optimized-2k`;
+  const sizeSuffix = `optimized-${getTextureSizeLabel(textureSize)}`;
+  const optimizedSuffixPattern = /optimized-(?:\d+k|\d+px)/i;
+  const outputName = optimizedSuffixPattern.test(parsedPath.name)
+    ? parsedPath.name.replace(optimizedSuffixPattern, sizeSuffix)
+    : `${parsedPath.name}-${sizeSuffix}`;
 
   return path.join(OUTPUT_DIR, parsedPath.dir, `${outputName}.glb`);
 }
 
-function calculateSize(width, height) {
-  const scale = Math.min(MAX_TEXTURE_SIZE / width, MAX_TEXTURE_SIZE / height);
+function calculateSize(width, height, textureSize) {
+  const scale = Math.min(textureSize / width, textureSize / height);
 
   return {
     width: Math.max(1, Math.round(width * scale)),
@@ -395,20 +430,27 @@ async function addExteriorIdMasks(document, colorCount) {
   };
 }
 
-async function optimizeModel(io, inputPath, colorCount) {
+function emptyMaskResult() {
+  return {
+    exteriorMaterials: 0,
+    masks: 0,
+    palette: [],
+    protectedPixels: 0,
+  };
+}
+
+async function optimizeModel(io, inputPath, options) {
   const document = await io.read(inputPath);
   const root = document.getRoot();
-  const baseColorTextures = new Set();
-
-  for (const material of root.listMaterials()) {
-    const texture = material.getBaseColorTexture();
-    if (texture) baseColorTextures.add(texture);
-  }
+  const textures = root.listTextures();
+  const inputTextureNames = new Map(
+    textures.map((texture) => [texture, texture.getName()]),
+  );
 
   let resizedTextures = 0;
   let skippedTextures = 0;
 
-  for (const texture of baseColorTextures) {
+  for (const texture of textures) {
     const image = texture.getImage();
 
     if (!image) {
@@ -423,18 +465,21 @@ async function optimizeModel(io, inputPath, colorCount) {
       throw new Error(`Dimenzije teksture "${texture.getName() || "unnamed"}" nisu dostupne.`);
     }
 
-    if (width <= MAX_TEXTURE_SIZE && height <= MAX_TEXTURE_SIZE) {
+    if (width <= options.textureSize && height <= options.textureSize) {
       skippedTextures += 1;
       continue;
     }
 
-    const target = calculateSize(width, height);
+    const target = calculateSize(width, height, options.textureSize);
+    const isIdMask = texture.getName().toLowerCase().includes("masked");
     const resizedImage = await sharp(image)
       .resize({
         width: target.width,
         height: target.height,
         fit: "fill",
-        kernel: sharp.kernel.lanczos3,
+        // RuÄno kreirane ID maske sadrÅ¾e diskretne vrednosti i ne smeju
+        // dobiti interpolirane boje tokom smanjivanja.
+        kernel: isIdMask ? sharp.kernel.nearest : sharp.kernel.lanczos3,
       })
       .toBuffer();
 
@@ -446,14 +491,23 @@ async function optimizeModel(io, inputPath, colorCount) {
     );
   }
 
-  const idMasks = await addExteriorIdMasks(document, colorCount);
-  const outputPath = getOutputPath(inputPath);
+  const idMasks = options.createMasks
+    ? await addExteriorIdMasks(document, options.idMaskColorCount)
+    : emptyMaskResult();
+
+  // glTF-Transform ponekad normalizuje embedded image podatke tokom upisa.
+  // Eksplicitno vraÄ‡amo svaki naziv koji je postojao u ulaznom modelu.
+  for (const [texture, inputName] of inputTextureNames) {
+    texture.setName(inputName);
+  }
+
+  const outputPath = getOutputPath(inputPath, options.textureSize);
   await mkdir(path.dirname(outputPath), { recursive: true });
   await io.write(outputPath, document);
 
   return {
     outputPath,
-    baseColorTextures: baseColorTextures.size,
+    textures: textures.length,
     resizedTextures,
     skippedTextures,
     idMasks,
@@ -465,7 +519,7 @@ async function main() {
   await mkdir(OUTPUT_DIR, { recursive: true });
 
   const glbFiles = await findGlbFiles(INPUT_DIR);
-  const idMaskColorCount = getIdMaskColorCount();
+  const options = getOptions();
   const io = new NodeIO()
     .registerExtensions(ALL_EXTENSIONS)
     .registerDependencies({
@@ -485,19 +539,19 @@ async function main() {
 
   console.log(`Pronađeno GLB modela: ${glbFiles.length}`);
   console.log(
-    `Broj grupa boja za ID maske: ${idMaskColorCount} (promeni sa --id-colors=N)`,
+    `Texture size: ${options.textureSize}px; create masks: ${options.createMasks}; ID colors: ${options.idMaskColorCount}`,
   );
 
   for (const inputPath of glbFiles) {
     console.log(`\nModel: ${path.relative(INPUT_DIR, inputPath)}`);
 
     try {
-      const result = await optimizeModel(io, inputPath, idMaskColorCount);
+      const result = await optimizeModel(io, inputPath, options);
       resizedTextures += result.resizedTextures;
       skippedTextures += result.skippedTextures;
       createdMasks += result.idMasks.masks;
 
-      console.log(`  Base Color tekstura: ${result.baseColorTextures}`);
+      console.log(`  Tekstura: ${result.textures}`);
       console.log(`  Exterior ID maski: ${result.idMasks.masks}`);
       console.log(`  ID šara: ${result.idMasks.palette.length}`);
       console.log(
@@ -517,9 +571,9 @@ async function main() {
 
   console.log("\nRezultat:");
   console.log(`  Modela: ${glbFiles.length - failedModels}/${glbFiles.length} uspešno`);
-  console.log(`  Smanjenih Base Color tekstura: ${resizedTextures}`);
+  console.log(`  Smanjenih tekstura: ${resizedTextures}`);
   console.log(`  Kreiranih exterior ID maski: ${createdMasks}`);
-  console.log(`  Preskočenih Base Color tekstura (<= 2048 px ili bez slike): ${skippedTextures}`);
+  console.log(`  Preskočenih tekstura (<= ${options.textureSize}px ili bez slike): ${skippedTextures}`);
 
   if (failedModels > 0) process.exitCode = 1;
 }

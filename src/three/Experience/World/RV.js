@@ -305,7 +305,7 @@ export default class RV{
         }
 
         if (!textureChangerReady) {
-            console.warn("RV model nema dostupne exterior ID maske.");
+            console.warn("RV model nema masked teksture sa validnim rvPatternColors podacima.");
         }
 
         const textures = [

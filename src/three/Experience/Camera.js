@@ -47,6 +47,22 @@ export default class Camera{
             "back" : {
                 "camera" : new THREE.Vector3(1.18, 2.4, -15.2),
                 "target" : new THREE.Vector3(0.5, 2.25, 1.26)
+            },
+            "kitchen": {
+                "camera": new THREE.Vector3(-1.6, 2.3, 1.2),
+                "target": new THREE.Vector3(1.8, 2.0, 1.1)
+            },
+            "living": {
+                "camera": new THREE.Vector3(2.0, 2.2, 1.0),
+                "target": new THREE.Vector3(-1.4, 1.9, 1.0)
+            },
+            "bedroom": {
+                "camera": new THREE.Vector3(3.7, 2.1, 0.8),
+                "target": new THREE.Vector3(1.0, 1.8, 0.8)
+            },
+            "bathroom": {
+                "camera": new THREE.Vector3(0.2, 2.15, -0.4),
+                "target": new THREE.Vector3(0.2, 1.9, 1.8)
             }
         }
         
@@ -63,10 +79,15 @@ export default class Camera{
     setOrbitControls(){
         this.controls = new OrbitControls(this.instance, this.canvas);
         this.controls.target.set(this.positions.right.target.x, this.positions.right.target.y, this.positions.right.target.z);
-        this.controls.enablePan = false;
+        // Privremeno uklonjeno radi izvlačenja koordinata kamere:
+        // this.controls.enablePan = false;
+        this.controls.enablePan = true;
         this.controls.enableDamping = true;
-        this.controls.minDistance = this.zoomSettings.minDistance;
-        this.controls.maxDistance = this.zoomSettings.maxDistance;
+        // Originalna ograničenja zumiranja, sačuvana za ponovno uključivanje:
+        // this.controls.minDistance = this.zoomSettings.minDistance;
+        // this.controls.maxDistance = this.zoomSettings.maxDistance;
+        this.controls.minDistance = 0.01;
+        this.controls.maxDistance = Infinity;
         this.controls.minPolarAngle = Math.PI/2.5;
         this.controls.maxPolarAngle = Math.PI / 2;
     }
@@ -77,8 +98,13 @@ export default class Camera{
     update(){
         this.controls.update();
     }
-    updateCameraView(view){
-        const position = this.positions[view];
+    updateCameraView(view, coordinates){
+        const position = coordinates
+            ? {
+                camera: new THREE.Vector3(...coordinates.cameraPosition),
+                target: new THREE.Vector3(...coordinates.target)
+            }
+            : this.positions[view];
 
         if (!position || !this.instance || !this.controls) {
             return;

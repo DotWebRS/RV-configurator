@@ -13,7 +13,7 @@ export type ExperienceInstance = {
     destroy: () => void;
     unloadWorld: () => void;
     reloadWorld: (sources?: unknown[]) => void;
-    updateCameraView: (view: string) => void;
+    updateCameraView: (view: string, coordinates?: { cameraPosition: [number, number, number]; target: [number, number, number] }) => void;
     setZoomPercent: (percent: number) => void;
     getZoomPercent: () => number;
     onZoomChange: (callback: (percent: number) => void) => () => void;
@@ -45,6 +45,12 @@ type ExperienceRef = MutableRefObject<ExperienceInstance | null>;
 const ExperienceContext = createContext<ExperienceRef | null>(null);
 
 type ConfiguratorUiContextValue = {
+    activeModelId: string;
+    setActiveModelId: (modelId: string) => void;
+    selectedFloorPlanId: string;
+    setSelectedFloorPlanId: (floorPlanId: string) => void;
+    viewMode: "Interior" | "Exterior";
+    setViewMode: (mode: "Interior" | "Exterior") => void;
     activeCameraView: string;
     setActiveCameraView: (view: string) => void;
     isModelLoading: boolean;
@@ -58,6 +64,9 @@ const ConfiguratorUiContext = createContext<ConfiguratorUiContextValue | null>(n
 export function ExperienceProvider({ children }: { children: ReactNode }) {
     const experienceRef = useRef<ExperienceInstance | null>(null);
     const [activeCameraView, setActiveCameraView] = useState("Right View");
+    const [activeModelId, setActiveModelId] = useState("elegante");
+    const [selectedFloorPlanId, setSelectedFloorPlanId] = useState("elegante-33efs");
+    const [viewMode, setViewMode] = useState<"Interior" | "Exterior">("Exterior");
     const [isModelLoading, setModelLoading] = useState(true);
     const [patternColors, setPatternColors] = useState<PatternColor[]>([]);
 
@@ -65,6 +74,12 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
         <ExperienceContext.Provider value={experienceRef}>
             <ConfiguratorUiContext.Provider
                 value={{
+                    activeModelId,
+                    setActiveModelId,
+                    selectedFloorPlanId,
+                    setSelectedFloorPlanId,
+                    viewMode,
+                    setViewMode,
                     activeCameraView,
                     setActiveCameraView,
                     isModelLoading,

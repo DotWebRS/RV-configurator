@@ -1,63 +1,59 @@
 "use client";
 
-import { useState } from "react";
-import { models } from "./data";
+import { modelConfigurations } from "./data";
+import { useConfiguratorUi, useExperienceRef } from "../three/ExperienceContext";
 
 const ChooseModel = () => {
+    const experienceRef = useExperienceRef();
+    const {
+        activeModelId,
+        setActiveModelId,
+        setSelectedFloorPlanId,
+        setActiveCameraView,
+        setViewMode,
+        isModelLoading,
+        setModelLoading,
+    } = useConfiguratorUi();
 
-    const [activeModel, setActiveModel] = useState(4);
+    const handleClick = async (modelId: string) => {
+        const model = modelConfigurations.find((item) => item.id === modelId);
+        const firstPlan = model?.floorPlans[0];
+        const experience = experienceRef.current;
 
-    const handleClick = (index: number) => {
+        if (!model || !firstPlan || !experience || isModelLoading || modelId === activeModelId) return;
 
-        setActiveModel(index);
+        setActiveModelId(model.id);
+        setSelectedFloorPlanId(firstPlan.id);
+        setViewMode("Exterior");
+        setActiveCameraView("Right View");
+        experience.updateCameraView("right");
+        setModelLoading(true);
 
-        console.log(`Kliknuo sam na ${models[index]}`);
-
+        try {
+            await experience.changeRV(firstPlan.modelPath);
+        } finally {
+            setModelLoading(false);
+        }
     };
 
     return (
-
         <div className="choose-model">
-
-            <p className="choose-model-title">
-                Choose Model
-            </p>
-
+            <p className="choose-model-title">Choose Model</p>
             <div className="choose-model-tabs">
-
-                {
-
-                    models.map((model, index) => (
-
-                        <button
-
-                            key={model}
-                            disabled={model !== "Luxe Regent"}
-
-                            className={
-                                index === activeModel
-                                    ? "tab active"
-                                    : "tab"
-                            }
-
-                            onClick={() => handleClick(index)}
-
-                        >
-
-                            {model}
-
-                        </button>
-
-                    ))
-
-                }
-
+                {modelConfigurations.map((model) => (
+                    <button
+                        key={model.id}
+                        disabled={model.floorPlans.length === 0 || isModelLoading}
+                        className={model.id === activeModelId ? "tab active" : "tab"}
+                        onClick={() => handleClick(model.id)}
+                        title={model.floorPlans.length === 0 ? "Floor plans and model will be added soon" : undefined}
+                    >
+                        {model.name}
+                    </button>
+                ))}
             </div>
-
         </div>
-
     );
-
 };
 
 export default ChooseModel;

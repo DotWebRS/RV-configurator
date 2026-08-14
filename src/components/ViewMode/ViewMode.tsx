@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useConfiguratorUi, useExperienceRef } from "../../three/ExperienceContext";
+import { getFloorPlan } from "../data";
 
 const viewModes = [
     {
@@ -15,11 +16,17 @@ const viewModes = [
 
 const ViewMode = () => {
 
-    const [activeMode, setActiveMode] = useState(1);
+    const experienceRef = useExperienceRef();
+    const { viewMode, setViewMode, setActiveCameraView, isModelLoading, activeModelId, selectedFloorPlanId } = useConfiguratorUi();
 
     const handleClick = (index: number) => {
-        setActiveMode(index);
-        console.log(`Kliknuo sam na ${viewModes[index].label}`);
+        if (isModelLoading) return;
+        const mode = viewModes[index].label as "Interior" | "Exterior";
+        setViewMode(mode);
+        const initialView = mode === "Interior" ? "Kitchen" : "Right View";
+        setActiveCameraView(initialView);
+        const kitchenCoordinates = getFloorPlan(activeModelId, selectedFloorPlanId)?.rooms.kitchen;
+        experienceRef.current?.updateCameraView(mode === "Interior" ? "kitchen" : "right", mode === "Interior" ? kitchenCoordinates : undefined);
     };
 
     return (
@@ -27,7 +34,7 @@ const ViewMode = () => {
         <div className="view-mode">
 
             <p className="view-mode-title">
-                Model View
+                View Mode
             </p>
 
             <div className="view-mode-buttons">
@@ -38,7 +45,7 @@ const ViewMode = () => {
                         <button
                             key={mode.label}
                             className={
-                                index === activeMode
+                                mode.label === viewMode
                                     ? "view-button active"
                                     : "view-button"
                             }

@@ -21,7 +21,7 @@ export default class Environment{
         this.setHDR();
     }
     setSunLight(){
-        this.sunLight = new THREE.DirectionalLight('#fffaf2', 0.85);
+        this.sunLight = new THREE.DirectionalLight('#fffaf2', 1.35);
         this.sunLight.castShadow = true;
         this.sunLight.shadow.mapSize.set(
             2048,
@@ -93,7 +93,7 @@ export default class Environment{
         ];
 
         this.surroundLights = lightSettings.map((settings) => {
-            const light = new THREE.DirectionalLight("#eef2f8", 0.55);
+            const light = new THREE.DirectionalLight("#eef2f8", 0.9);
             light.name = settings.name;
             light.position.copy(settings.position);
             light.target.position.copy(this.lightTarget);
@@ -119,9 +119,9 @@ export default class Environment{
 
             0xd8e2f0,   // boja neba
 
-            0x303744,   // boja poda
+            0x596574,   // boja poda
 
-            0.55
+            0.9
 
         );
 
@@ -150,7 +150,7 @@ export default class Environment{
             this.environmentTexture.mapping = THREE.EquirectangularReflectionMapping;
 
             this.scene.environment = this.environmentTexture;
-            this.scene.environmentIntensity = 1.1;
+            this.scene.environmentIntensity = 1.5;
             this.scene.background = null;
         });
     }

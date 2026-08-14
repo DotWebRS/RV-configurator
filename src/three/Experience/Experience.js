@@ -43,8 +43,8 @@ export default class Experience{
         this.time.on('tick', this.onTick);
     }
 
-    updateCameraView(view){
-        this.camera.updateCameraView(view);
+    updateCameraView(view, coordinates){
+        this.camera.updateCameraView(view, coordinates);
     }
     setZoomPercent(percent){
         this.camera.setZoomPercent(percent);
