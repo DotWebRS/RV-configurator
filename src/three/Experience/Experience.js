@@ -17,6 +17,7 @@ export default class Experience{
         }
         instance = this;
         this.destroyed = false;
+        this.cameraInteractionMode = "Exterior";
         this.textureColorListeners = new Set();
         this.sources = sources;
         //Global access
@@ -45,9 +46,23 @@ export default class Experience{
 
     updateCameraView(view, coordinates){
         this.camera.updateCameraView(view, coordinates);
+
+        if(this.cameraInteractionMode === "Interior"){
+            this.world?.envronment?.setHDR(
+                view === "bathroom"
+                    ? "en_suite_1k.hdr"
+                    : "relax_inn_seaview_suite_1k.hdr"
+            );
+        }
     }
     setCameraInteractionMode(mode){
+        this.cameraInteractionMode = mode;
         this.camera.setInteractionMode(mode);
+        this.world?.envronment?.setHDR(
+            mode === "Exterior"
+                ? "horn-koppe_spring_1k.hdr"
+                : "relax_inn_seaview_suite_1k.hdr"
+        );
     }
     setZoomPercent(percent){
         this.camera.setZoomPercent(percent);
@@ -146,6 +161,7 @@ export default class Experience{
         this.canvas = null;
         this.scene = null;
         this.camera = null;
+        this.cameraInteractionMode = null;
         this.renderer = null;
         this.debug = null;
         this.sizes = null;

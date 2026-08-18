@@ -7,6 +7,8 @@ import {
     type ExperienceInstance,
     type PatternColor,
 } from "../three/ExperienceContext";
+import { getSelectionFromPath } from "../configuratorUrl";
+import { modelConfigurations } from "./data";
 
 const Viewer = () => {
 
@@ -22,6 +24,8 @@ const Viewer = () => {
         setModelLoading,
         setActiveCameraView,
         setPatternColors,
+        setActiveModelId,
+        setSelectedFloorPlanId,
         viewMode,
     } = useConfiguratorUi();
     const getActualZoomMaximum = () =>
@@ -91,6 +95,8 @@ const Viewer = () => {
         let cancelled = false;
         let unsubscribeZoom = () => {};
         let unsubscribeTextureColors = () => {};
+        let removePopStateListener = () => {};
+        let loadedFloorPlanId = "elegante-33efs";
 
         const createExperience = async () => {
             const { default: Experience } = await import('../three/Experience/Experience');
@@ -117,6 +123,33 @@ const Viewer = () => {
 
             await experience.whenInitialModelReady();
 
+            const loadSelectionFromUrl = async () => {
+                const selection = getSelectionFromPath(window.location.pathname) ?? {
+                    model: modelConfigurations[0],
+                    floorPlan: modelConfigurations[0].floorPlans[0],
+                };
+
+                setActiveModelId(selection.model.id);
+                setSelectedFloorPlanId(selection.floorPlan.id);
+                if (selection.floorPlan.id !== loadedFloorPlanId) {
+                    await experience.changeRV(selection.floorPlan.modelPath);
+                    loadedFloorPlanId = selection.floorPlan.id;
+                }
+            };
+
+            await loadSelectionFromUrl();
+
+            const handlePopState = async () => {
+                setModelLoading(true);
+                try {
+                    await loadSelectionFromUrl();
+                } finally {
+                    setModelLoading(false);
+                }
+            };
+            window.addEventListener("popstate", handlePopState);
+            removePopStateListener = () => window.removeEventListener("popstate", handlePopState);
+
             if (!cancelled) {
                 setModelLoading(false);
             }
@@ -128,6 +161,7 @@ const Viewer = () => {
             cancelled = true;
             unsubscribeZoom();
             unsubscribeTextureColors();
+            removePopStateListener();
             document.body.style.overflow = "auto";
             experienceRef.current?.destroy();
             experienceRef.current = null;

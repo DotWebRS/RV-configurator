@@ -131,7 +131,18 @@ const createFloorPlan = ({
     black = "40 gal",
     fresh = "75 gal",
 }: FloorPlanInput): FloorPlan => ({
-    id, name, modelPath, rooms, image, height, length, width, gvwr, grey, black, fresh,
+    id,
+    name,
+    modelPath: modelPath.startsWith("/") ? modelPath : `/${modelPath}`,
+    rooms,
+    image,
+    height,
+    length,
+    width,
+    gvwr,
+    grey,
+    black,
+    fresh,
 });
 
 export const modelConfigurations: ModelConfiguration[] = [

@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { getCountries, getCountryCallingCode, parsePhoneNumberFromString, type CountryCode } from "libphonenumber-js";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent, type MutableRefObject, type RefObject } from "react";
+import { AsYouType, getCountries, getCountryCallingCode, parsePhoneNumberFromString, type CountryCode } from "libphonenumber-js";
+import { allCountries } from "country-region-data";
 import { useConfiguratorUi, useExperienceRef } from "../three/ExperienceContext";
 import { getModelConfiguration, type FloorPlan } from "./data";
 import "./UpgradeSteps.css";
+import { pushConfiguratorUrl } from "../configuratorUrl";
 
 type Upgrade = { id: string; name: string; price: number; image: string };
 type PreviewItem = { name: string; image: string; price?: number };
@@ -70,8 +72,28 @@ const upgradeGroups: Record<string, Upgrade[]> = {
 const money = (value: number) => `$${value.toLocaleString("en-US")}`;
 const upgradeCategories = Object.keys(upgradeGroups);
 const countryNames = new Intl.DisplayNames(["en"], { type: "region" });
-const countries = getCountries().map((code) => ({ code, name: countryNames.of(code) ?? code, dial: getCountryCallingCode(code) })).sort((a, b) => a.name.localeCompare(b.name));
-const countryFlag = (code: string) => String.fromCodePoint(...code.split("").map((letter) => 127397 + letter.charCodeAt(0)));
+const countries = getCountries()
+    .filter((code) => code !== "XK")
+    .map((code) => ({ code, name: countryNames.of(code) ?? code, dial: getCountryCallingCode(code) }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+const countryRegionData = new Map<string, { countryName: string; regions: string[] }>(
+    allCountries.map(([countryName, countryCode, regions]) => [
+        countryCode,
+        { countryName, regions: regions.map(([regionName]) => regionName) },
+    ]),
+);
+const countriesWithoutProvinceSelection = new Set(["RS"]);
+
+const getStateProvinceOptions = (countryCode: CountryCode) => {
+    const data = countryRegionData.get(countryCode);
+    const countryName = countryNames.of(countryCode) ?? data?.countryName ?? countryCode;
+
+    if (countriesWithoutProvinceSelection.has(countryCode) || !data?.regions.length) {
+        return [countryName];
+    }
+
+    return data.regions;
+};
 
 function useAnimatedNumber(value: number, duration = 2000) {
     const [displayed, setDisplayed] = useState(value);
@@ -101,11 +123,20 @@ export default function RightPanel() {
     const [preview, setPreview] = useState<PreviewItem | null>(null);
     const [summaryOpen, setSummaryOpen] = useState(false);
     const [country, setCountry] = useState<CountryCode>("US");
+    const [countryOpen, setCountryOpen] = useState(false);
+    const [stateOpen, setStateOpen] = useState(false);
+    const [stateTouched, setStateTouched] = useState(false);
     const [phoneTouched, setPhoneTouched] = useState(false);
     const [preparedPayload, setPreparedPayload] = useState<Record<string, unknown> | null>(null);
     const [contact, setContact] = useState<ContactForm>({ firstName: "", lastName: "", phone: "", state: "", email: "", serviceConsent: false, marketingConsent: false });
     const tabsRef = useRef<HTMLDivElement | null>(null);
     const phoneRef = useRef<HTMLInputElement | null>(null);
+    const countryButtonRef = useRef<HTMLButtonElement | null>(null);
+    const stateButtonRef = useRef<HTMLButtonElement | null>(null);
+    const countryOptionRefs = useRef(new Map<string, HTMLButtonElement>());
+    const stateOptionRefs = useRef(new Map<string, HTMLButtonElement>());
+    const countrySearchRef = useRef({ query: "", at: 0 });
+    const stateSearchRef = useRef({ query: "", at: 0 });
     const dragRef = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
     const experienceRef = useExperienceRef();
     const { activeModelId, selectedFloorPlanId, setSelectedFloorPlanId, isModelLoading, setModelLoading, setActiveCameraView, setViewMode, patternColors } = useConfiguratorUi();
@@ -118,6 +149,7 @@ export default function RightPanel() {
     const animatedEstimatedTotal = useAnimatedNumber(basePrice + upgradesTotal);
     const fullPhone = `+${getCountryCallingCode(country)}${contact.phone.replace(/\D/g, "")}`;
     const isPhoneValid = contact.phone.trim().length > 0 && parsePhoneNumberFromString(fullPhone)?.isValid() === true;
+    const stateProvinceOptions = getStateProvinceOptions(country);
     const buildConfiguration = useMemo(() => ({
         model: activeModel.name,
         floorPlan: selectedPlan?.name ?? null,
@@ -131,6 +163,106 @@ export default function RightPanel() {
     const updateContact = <K extends keyof ContactForm>(key: K, value: ContactForm[K]) => {
         setPreparedPayload(null);
         setContact((current) => ({ ...current, [key]: value }));
+    };
+
+    const selectCountry = (countryCode: CountryCode) => {
+        setCountry(countryCode);
+        setCountryOpen(false);
+        setStateOpen(false);
+        setStateTouched(false);
+        setPhoneTouched(true);
+        setPreparedPayload(null);
+        setContact((current) => ({ ...current, state: "" }));
+        countryButtonRef.current?.focus();
+    };
+
+    const updatePhoneFromInput = (rawValue: string) => {
+        const trimmedValue = rawValue.trim();
+        const internationalValue = trimmedValue.startsWith("+")
+            ? trimmedValue
+            : trimmedValue.startsWith("00")
+                ? `+${trimmedValue.slice(2)}`
+                : null;
+        const internationalPhone = internationalValue
+            ? parsePhoneNumberFromString(internationalValue)
+            : undefined;
+        const detectedCountry = internationalPhone?.country;
+        const canUseDetectedCountry = detectedCountry
+            && detectedCountry !== "XK"
+            && countries.some((item) => item.code === detectedCountry);
+        const nextCountry = canUseDetectedCountry ? detectedCountry : country;
+        const numberToFormat = canUseDetectedCountry && internationalPhone
+            ? internationalPhone.nationalNumber
+            : rawValue;
+        const formattedPhone = new AsYouType(nextCountry).input(numberToFormat);
+
+        if (nextCountry !== country) {
+            setCountry(nextCountry);
+            setStateOpen(false);
+            setStateTouched(false);
+        }
+
+        setPreparedPayload(null);
+        setContact((current) => ({
+            ...current,
+            phone: formattedPhone,
+            state: nextCountry !== country ? "" : current.state,
+        }));
+    };
+
+    const handleDropdownKeyboard = (
+        event: ReactKeyboardEvent<HTMLDivElement>,
+        values: string[],
+        selectedValue: string,
+        setOpen: (open: boolean) => void,
+        optionRefs: MutableRefObject<Map<string, HTMLButtonElement>>,
+        searchRef: MutableRefObject<{ query: string; at: number }>,
+        triggerRef: RefObject<HTMLButtonElement | null>,
+    ) => {
+        const currentValue = (document.activeElement as HTMLElement | null)?.dataset.optionValue;
+        const currentIndex = currentValue ? values.indexOf(currentValue) : values.indexOf(selectedValue);
+
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            setOpen(true);
+            const direction = event.key === "ArrowDown" ? 1 : -1;
+            const fallback = direction === 1 ? 0 : values.length - 1;
+            const nextIndex = currentIndex < 0 ? fallback : (currentIndex + direction + values.length) % values.length;
+            requestAnimationFrame(() => optionRefs.current.get(values[nextIndex])?.focus());
+            return;
+        }
+
+        if (event.key === "Escape") {
+            event.preventDefault();
+            setOpen(false);
+            triggerRef.current?.focus();
+            return;
+        }
+
+        if (event.key.length !== 1 || !/[a-z0-9]/i.test(event.key)) return;
+
+        event.preventDefault();
+        const now = Date.now();
+        const character = event.key.toLowerCase();
+        let query = now - searchRef.current.at < 750
+            ? searchRef.current.query + character
+            : character;
+        let matches = values.filter((value) => value.toLowerCase().startsWith(query));
+
+        if (matches.length === 0) {
+            query = character;
+            matches = values.filter((value) => value.toLowerCase().startsWith(query));
+        }
+
+        searchRef.current = { query, at: now };
+        if (matches.length === 0) return;
+
+        const activeMatchIndex = currentValue ? matches.indexOf(currentValue) : -1;
+        const match = query.length === 1 && activeMatchIndex >= 0
+            ? matches[(activeMatchIndex + 1) % matches.length]
+            : matches[0];
+        setOpen(true);
+        requestAnimationFrame(() => optionRefs.current.get(match)?.focus());
     };
 
     useEffect(() => {
@@ -150,6 +282,12 @@ export default function RightPanel() {
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setPhoneTouched(true);
+        setStateTouched(true);
+
+        if (!contact.state) {
+            stateButtonRef.current?.focus();
+            return;
+        }
 
         if (!event.currentTarget.checkValidity() || !isPhoneValid) {
             event.currentTarget.reportValidity();
@@ -195,10 +333,15 @@ export default function RightPanel() {
     };
 
     const choosePlan = async (plan: FloorPlan) => {
-        if (isModelLoading || selectedFloorPlanId === plan.id) return;
+        if (isModelLoading) return;
+        if (selectedFloorPlanId === plan.id) {
+            pushConfiguratorUrl(activeModel, plan);
+            return;
+        }
         const experience = experienceRef.current;
         if (!experience) return;
         setSelectedFloorPlanId(plan.id);
+        pushConfiguratorUrl(activeModel, plan);
         setViewMode("Exterior");
         experience.setCameraInteractionMode("Exterior");
         setActiveCameraView("Right View");
@@ -323,14 +466,43 @@ export default function RightPanel() {
                     <label>Last name *<input required pattern=".*\S.*" title="Enter your last name." value={contact.lastName} onChange={(event) => updateContact("lastName", event.target.value)} placeholder="Last name" /></label>
                     <label className="form-wide">Phone number *
                         <div className={`phone-field ${phoneTouched && !isPhoneValid ? "invalid" : ""}`}>
-                            <select aria-label="Country and calling code" value={country} onChange={(event) => { setCountry(event.target.value as CountryCode); setPhoneTouched(true); setPreparedPayload(null); }}>
-                                {countries.map((item) => <option key={item.code} value={item.code}>{countryFlag(item.code)} {item.code} (+{item.dial})</option>)}
-                            </select>
-                            <input ref={phoneRef} required type="tel" value={contact.phone} onBlur={() => setPhoneTouched(true)} onChange={(event) => updateContact("phone", event.target.value)} placeholder="Phone number" aria-invalid={phoneTouched && !isPhoneValid} />
+                            <div className={`custom-select country-select ${countryOpen ? "open" : ""}`} onKeyDown={(event) => handleDropdownKeyboard(event, countries.map((item) => item.code), country, setCountryOpen, countryOptionRefs, countrySearchRef, countryButtonRef)}>
+                                <button ref={countryButtonRef} type="button" className="custom-select-trigger" aria-label="Country" aria-haspopup="listbox" aria-expanded={countryOpen} onClick={() => { setCountryOpen((open) => !open); setStateOpen(false); }}>{country}<span className="select-chevron" /></button>
+                                {countryOpen && <div className="custom-select-menu" role="listbox" aria-label="Countries">
+                                    {countries.map((item) => <button ref={(element) => { if (element) countryOptionRefs.current.set(item.code, element); else countryOptionRefs.current.delete(item.code); }} data-option-value={item.code} type="button" role="option" aria-selected={country === item.code} className={country === item.code ? "selected" : ""} key={item.code} onClick={() => selectCountry(item.code)}>{item.code}</button>)}
+                                </div>}
+                            </div>
+                            <span className="phone-dial-code">+{getCountryCallingCode(country)}</span>
+                            <input
+                                ref={phoneRef}
+                                required
+                                type="tel"
+                                name="phone"
+                                autoComplete="tel"
+                                value={contact.phone}
+                                onBlur={() => setPhoneTouched(true)}
+                                onChange={(event) => updatePhoneFromInput(event.target.value)}
+                                onInput={(event) => updatePhoneFromInput(event.currentTarget.value)}
+                                onAnimationStart={(event) => {
+                                    if (event.animationName === "phone-autofill-start") {
+                                        updatePhoneFromInput(event.currentTarget.value);
+                                    }
+                                }}
+                                placeholder={country === "US" ? "(555) 000-0000" : "Phone number"}
+                                aria-invalid={phoneTouched && !isPhoneValid}
+                            />
                         </div>
                         {phoneTouched && !isPhoneValid && <small className="phone-error">Enter a valid phone number for the selected country.</small>}
                     </label>
-                    <label className="form-wide">State/Province *<select required value={contact.state} onChange={(event) => updateContact("state", event.target.value)}><option value="">Select</option><option>Alabama</option><option>Alaska</option><option>Arizona</option><option>California</option><option>Florida</option><option>New York</option><option>Texas</option><option>Other</option></select></label>
+                    <label className="form-wide">State/Province *
+                        <div className={`custom-select state-select ${stateOpen ? "open" : ""} ${stateTouched && !contact.state ? "invalid" : ""}`} onKeyDown={(event) => handleDropdownKeyboard(event, stateProvinceOptions, contact.state, setStateOpen, stateOptionRefs, stateSearchRef, stateButtonRef)}>
+                            <button ref={stateButtonRef} type="button" className="custom-select-trigger" aria-haspopup="listbox" aria-expanded={stateOpen} aria-invalid={stateTouched && !contact.state} onClick={() => { setStateOpen((open) => !open); setCountryOpen(false); }}>{contact.state || "Select"}<span className="select-chevron" /></button>
+                            {stateOpen && <div className="custom-select-menu" role="listbox" aria-label="State or province">
+                                {stateProvinceOptions.map((state) => <button ref={(element) => { if (element) stateOptionRefs.current.set(state, element); else stateOptionRefs.current.delete(state); }} data-option-value={state} type="button" role="option" aria-selected={contact.state === state} className={contact.state === state ? "selected" : ""} key={state} onClick={() => { updateContact("state", state); setStateTouched(true); setStateOpen(false); stateButtonRef.current?.focus(); }}>{state}</button>)}
+                            </div>}
+                        </div>
+                        {stateTouched && !contact.state && <small className="phone-error">Select a state or province.</small>}
+                    </label>
                     <label className="form-wide">Email *<input required type="email" value={contact.email} onChange={(event) => updateContact("email", event.target.value)} placeholder="you@mail.com" /></label>
                 </div>
                 <label className="consent-row"><input type="checkbox" checked={contact.serviceConsent} onChange={(event) => updateContact("serviceConsent", event.target.checked)} /><span>I consent to receive text messages about appointment reminders, account notifications, and relevant information from Luxe Fifth Wheels at the phone number I provided. I acknowledge that my consent is not a condition of purchase. Msg &amp; data rates may apply. Msg frequency varies. Reply HELP for assistance or STOP to opt out of receiving messages. Privacy Policy &amp; Terms &amp; Conditions .</span></label>
