@@ -48,16 +48,3 @@ npm run optimize-models -- --texture-size=2048 --masks --id-colors=6
 ```
 
 Input texture names are preserved in the output GLB. Output filenames include the requested texture size, for example `model-optimized-1k.glb` or `model-optimized-1536px.glb`.
-
-## Zoho lead submission
-
-Copy `.env.example` to `.env.local` and add the Zoho OAuth credentials locally. Real credentials must never be committed or exposed through client-side environment variables.
-
-Lead submission is a dry run by default. The API validates the request but does not refresh an OAuth token or contact Zoho. Live upsert requires both of these server-side values:
-
-```env
-ZOHO_LEAD_SUBMISSION_ENABLED=true
-ZOHO_LIVE_CONFIRMATION=UPSERT_REAL_ZOHO_LEADS
-```
-
-Keep both values disabled until the Zoho field API names and a sandbox/test lead have been verified.
