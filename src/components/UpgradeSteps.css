@@ -97,7 +97,10 @@
 .form-actions button { height:44px; border:1px solid #373A41; border-radius:7px; color:#F7F7F7; font:14px var(--font-open-sans); cursor:pointer; }
 .form-previous { background:#071528; }
 .form-send { background:#264064; }
-.form-payload-ready { grid-column:1/-1; margin:10px 0 0; color:#75e0a7; font-size:12px; text-align:center; }
+.form-send:disabled { cursor:wait; opacity:.65; }
+.form-submission-message { grid-column:1/-1; margin:10px 0 0; color:#75e0a7; font-size:12px; text-align:center; }
+.form-submission-message.dry-run { color:#fdb022; }
+.form-submission-message.error { color:#f97066; }
 @media(max-width:1440px) { .upgrade-tabs { gap:16px; padding-inline:5px; } .upgrade-grid { padding-inline:5px; gap:12px; } }
 @media(max-width:1024px) {
   .right-panel:has(.upgrades-section) { height:auto; max-height:none; overflow:visible; }

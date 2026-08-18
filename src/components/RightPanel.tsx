@@ -8,6 +8,7 @@ import { getModelConfiguration, type FloorPlan } from "./data";
 import "./UpgradeSteps.css";
 import { pushConfiguratorUrl } from "../configuratorUrl";
 import { getUpgradeGroups } from "./upgradeData";
+import type { LeadSubmissionResponse, ZohoLeadSubmission } from "../lib/zohoLead";
 
 type Upgrade = { id: string; name: string; price: number; image: string; restriction?: string; compatibility?: string[] };
 type PreviewItem = { name: string; image: string; price?: number };
@@ -82,7 +83,8 @@ export default function RightPanel() {
     const [stateOpen, setStateOpen] = useState(false);
     const [stateTouched, setStateTouched] = useState(false);
     const [phoneTouched, setPhoneTouched] = useState(false);
-    const [preparedPayload, setPreparedPayload] = useState<Record<string, unknown> | null>(null);
+    const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "dry-run" | "success" | "error">("idle");
+    const [submissionMessage, setSubmissionMessage] = useState("");
     const [contact, setContact] = useState<ContactForm>({ firstName: "", lastName: "", phone: "", state: "", email: "", serviceConsent: false, marketingConsent: false });
     const tabsRef = useRef<HTMLDivElement | null>(null);
     const phoneRef = useRef<HTMLInputElement | null>(null);
@@ -125,8 +127,13 @@ export default function RightPanel() {
         colors: Object.fromEntries(patternColors.map((pattern, index) => [`color${index + 1}`, pattern.color])),
     }), [activeModel.name, basePrice, patternColors, selected, selectedPlan?.name, upgradesTotal]);
 
+    const resetSubmissionStatus = () => {
+        setSubmissionStatus("idle");
+        setSubmissionMessage("");
+    };
+
     const updateContact = <K extends keyof ContactForm>(key: K, value: ContactForm[K]) => {
-        setPreparedPayload(null);
+        resetSubmissionStatus();
         setContact((current) => ({ ...current, [key]: value }));
     };
 
@@ -136,7 +143,7 @@ export default function RightPanel() {
         setStateOpen(false);
         setStateTouched(false);
         setPhoneTouched(true);
-        setPreparedPayload(null);
+        resetSubmissionStatus();
         setContact((current) => ({ ...current, state: "" }));
         countryButtonRef.current?.focus();
     };
@@ -167,7 +174,7 @@ export default function RightPanel() {
             setStateTouched(false);
         }
 
-        setPreparedPayload(null);
+        resetSubmissionStatus();
         setContact((current) => ({
             ...current,
             phone: formattedPhone,
@@ -249,7 +256,7 @@ export default function RightPanel() {
         setGroup("Interior");
         setPreview(null);
         setSummaryOpen(false);
-        setPreparedPayload(null);
+        resetSubmissionStatus();
     }, [activeModelId, selectedFloorPlanId]);
 
     useEffect(() => {
@@ -260,7 +267,7 @@ export default function RightPanel() {
         );
     }, [contact.phone, country, isPhoneValid]);
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setPhoneTouched(true);
         setStateTouched(true);
@@ -294,23 +301,40 @@ export default function RightPanel() {
             totalPrice: basePrice + upgradesTotal,
             selectedOptions: selectedByCategory,
         };
-        const payload = {
-            data: [{
-                First_Name: contact.firstName.trim(),
-                Last_Name: contact.lastName.trim(),
-                Email: contact.email.trim(),
-                Phone: fullPhone,
-                State: contact.state,
-                Lead_Source: "Luxe Build Your Own",
-                Service_Consent: contact.serviceConsent,
-                Marketing_Consent: contact.marketingConsent,
-                Luxe_Build_Configuration: luxeBuildConfiguration,
-            }],
-            duplicate_check_fields: ["Email", "Phone"],
+        const submission: ZohoLeadSubmission = {
+            firstName: contact.firstName.trim(),
+            lastName: contact.lastName.trim(),
+            email: contact.email.trim(),
+            phone: fullPhone,
+            state: contact.state,
+            serviceConsent: contact.serviceConsent,
+            marketingConsent: contact.marketingConsent,
+            buildConfiguration: luxeBuildConfiguration,
         };
 
-        setPreparedPayload(payload);
-        // console.log("Prepared Send My Build payload:", payload);
+        setSubmissionStatus("submitting");
+        setSubmissionMessage("");
+
+        try {
+            const response = await fetch("/api/zoho/leads", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(submission),
+            });
+            const result = await response.json() as LeadSubmissionResponse;
+
+            if (!response.ok || !result.ok) {
+                throw new Error(result.message || "Unable to submit your build.");
+            }
+
+            setSubmissionStatus(result.dryRun ? "dry-run" : "success");
+            setSubmissionMessage(result.message);
+        } catch (error) {
+            setSubmissionStatus("error");
+            setSubmissionMessage(
+                error instanceof Error ? error.message : "Unable to submit your build.",
+            );
+        }
     };
 
     const choosePlan = async (plan: FloorPlan) => {
@@ -348,7 +372,6 @@ export default function RightPanel() {
     return <>
         <aside className={`right-panel step-${step}`}>
             <script id="build-configuration" type="application/json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildConfiguration).replace(/</g, "\\u003c") }} />
-            {preparedPayload && <script id="lead-payload" type="application/json" dangerouslySetInnerHTML={{ __html: JSON.stringify(preparedPayload).replace(/</g, "\\u003c") }} />}
             <h2 className="right-title">{summaryOpen ? "Your Selected Upgrades" : `Customize Your ${activeModel.name}`}</h2>
             {summaryOpen && <div className="summary-details">
                 <button type="button" className="summary-back" onClick={() => setSummaryOpen(false)}>← Back</button>
@@ -492,8 +515,8 @@ export default function RightPanel() {
                 </div>
                 <label className="consent-row"><input type="checkbox" checked={contact.serviceConsent} onChange={(event) => updateContact("serviceConsent", event.target.checked)} /><span>I consent to receive text messages about appointment reminders, account notifications, and relevant information from Luxe Fifth Wheels at the phone number I provided. I acknowledge that my consent is not a condition of purchase. Msg &amp; data rates may apply. Msg frequency varies. Reply HELP for assistance or STOP to opt out of receiving messages. Privacy Policy &amp; Terms &amp; Conditions .</span></label>
                 <label className="consent-row"><input type="checkbox" checked={contact.marketingConsent} onChange={(event) => updateContact("marketingConsent", event.target.checked)} /><span>I consent to receive marketing text messages, such as promotional offers, discounts, and sales events from Luxe Fifth Wheels at the number I provided, including messages sent via auto dialer. I understand that my consent is not a condition of purchase. Msg &amp; data rates may apply. Msg frequency varies. Reply HELP for assistance or STOP to opt out of receiving messages. Privacy Policy &amp; Terms &amp; Conditions .</span></label>
-                <div className="form-actions"><button type="button" className="form-previous" onClick={() => setStep(2)}>Previous</button><button type="submit" className="form-send">Send My Build</button></div>
-                {preparedPayload && <p className="form-payload-ready" role="status">Build payload prepared successfully.</p>}
+                <div className="form-actions"><button type="button" className="form-previous" onClick={() => setStep(2)}>Previous</button><button type="submit" className="form-send" disabled={submissionStatus === "submitting"}>{submissionStatus === "submitting" ? "Sending..." : "Send My Build"}</button></div>
+                {submissionStatus !== "idle" && submissionStatus !== "submitting" && <p className={`form-submission-message ${submissionStatus}`} role={submissionStatus === "error" ? "alert" : "status"}>{submissionMessage}</p>}
             </form>}
 
             {!summaryOpen && step < 3 && <div className="build-summary">

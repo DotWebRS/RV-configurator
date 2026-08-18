@@ -49,19 +49,15 @@ npm run optimize-models -- --texture-size=2048 --masks --id-colors=6
 
 Input texture names are preserved in the output GLB. Output filenames include the requested texture size, for example `model-optimized-1k.glb` or `model-optimized-1536px.glb`.
 
+## Zoho lead submission
 
-1.
-Store ENV variables:
-client_id: 1000.4I4PNKLM9DPKBGAR2A2ZY816YGKUUD
-client_secret: 9a3df00e7a778ff79f0d9df7d1a86504fec50a83d1
-refresh_token: 1000.b1caec2abe511f6ecfaeabffd3ca8bdc.48e1498e8be38b07e50038b9d56b5025
+Copy `.env.example` to `.env.local` and add the Zoho OAuth credentials locally. Real credentials must never be committed or exposed through client-side environment variables.
 
-2.Generate an access token. the access token expires in an hour
+Lead submission is a dry run by default. The API validates the request but does not refresh an OAuth token or contact Zoho. Live upsert requires both of these server-side values:
 
-POST https://accounts.zoho.com/oauth/v2/token?client_id=1000.4I4PNKLM9DPKBGAR2A2ZY816YGKUUD&client_secret=9a3df00e7a778ff79f0d9df7d1a86504fec50a83d1&refresh_token=1000.b1caec2abe511f6ecfaeabffd3ca8bdc.48e1498e8be38b07e50038b9d56b5025&grant_type=refresh_token
+```env
+ZOHO_LEAD_SUBMISSION_ENABLED=true
+ZOHO_LIVE_CONFIRMATION=UPSERT_REAL_ZOHO_LEADS
+```
 
-In the above, replace values with env variables
-
-By using the generated access token, we can do CRUD actions for leads.
-
-POST: https://www.zohoapis.com/crm/v8/Leads/upsert
+Keep both values disabled until the Zoho field API names and a sandbox/test lead have been verified.
