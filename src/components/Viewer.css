@@ -22,7 +22,7 @@
     content: "";
   position: absolute;
   inset: 0;
-  padding: 0.7px; /* debljina bordera */
+  padding: 0.7px; /* Border thickness */
   /*border-radius: inherit;
 
   background:linear-gradient(
@@ -114,7 +114,7 @@
 
 
 
-/* DONJI LEVI KONTROLER */
+/* BOTTOM-LEFT CONTROLS */
 
 .cursor-controls {
 
@@ -188,7 +188,7 @@
 
 
 
-/* DONJI DESNI FULLSCREEN */
+/* BOTTOM-RIGHT FULLSCREEN CONTROL */
 
 .fullscreen-button {
 
@@ -288,7 +288,7 @@
 
 }
 
-/* Jedan border između elemenata */
+/* Single border between elements */
 
 .zoom-btn:first-child,
 .zoom-value {

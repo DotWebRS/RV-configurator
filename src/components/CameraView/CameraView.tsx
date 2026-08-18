@@ -48,7 +48,7 @@ const CameraView = () => {
         const experience = experienceRef.current;
 
         if (!experience) {
-            console.warn("Experience još nije inicijalizovan.");
+            console.warn("Experience has not been initialized yet.");
             return;
         }
 
@@ -113,11 +113,14 @@ const CameraView = () => {
                                 >
 
                                     <img
+                                        className={viewMode === "Exterior" ? "camera-card-image-exterior" : undefined}
                                         src={view.image}
                                         alt={view.label}
                                     />
 
-                                    <div className="camera-card-footer">
+                                    <div className={`camera-card-footer ${
+                                        view.camera === "garage-half-bath" ? "camera-card-footer-long" : ""
+                                    }`}>
 
                                         {view.label}
 

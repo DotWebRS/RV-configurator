@@ -304,7 +304,7 @@ async function readRgbaTexture(texture) {
   const source = texture.getImage();
 
   if (!source) {
-    throw new Error(`Tekstura "${texture.getName() || "unnamed"}" nema sliku.`);
+    throw new Error(`Texture "${texture.getName() || "unnamed"}" has no image.`);
   }
 
   return sharp(source)
@@ -462,7 +462,7 @@ async function optimizeModel(io, inputPath, options) {
     const { width, height } = metadata;
 
     if (!width || !height) {
-      throw new Error(`Dimenzije teksture "${texture.getName() || "unnamed"}" nisu dostupne.`);
+      throw new Error(`Dimensions for texture "${texture.getName() || "unnamed"}" are unavailable.`);
     }
 
     if (width <= options.textureSize && height <= options.textureSize) {
@@ -477,8 +477,8 @@ async function optimizeModel(io, inputPath, options) {
         width: target.width,
         height: target.height,
         fit: "fill",
-        // RuÄno kreirane ID maske sadrÅ¾e diskretne vrednosti i ne smeju
-        // dobiti interpolirane boje tokom smanjivanja.
+        // Manually created ID masks contain discrete values and must not
+        // receive interpolated colors during resizing.
         kernel: isIdMask ? sharp.kernel.nearest : sharp.kernel.lanczos3,
       })
       .toBuffer();
@@ -486,17 +486,17 @@ async function optimizeModel(io, inputPath, options) {
     texture.setImage(resizedImage);
     resizedTextures += 1;
 
-    console.log(
-      `  Smanjena: ${texture.getName() || "unnamed"} (${width}x${height} -> ${target.width}x${target.height})`,
-    );
+    // console.log(
+    //   `  Resized: ${texture.getName() || "unnamed"} (${width}x${height} -> ${target.width}x${target.height})`,
+    // );
   }
 
   const idMasks = options.createMasks
     ? await addExteriorIdMasks(document, options.idMaskColorCount)
     : emptyMaskResult();
 
-  // glTF-Transform ponekad normalizuje embedded image podatke tokom upisa.
-  // Eksplicitno vraÄ‡amo svaki naziv koji je postojao u ulaznom modelu.
+  // glTF-Transform sometimes normalizes embedded image data while writing.
+  // Explicitly restore every name that existed in the input model.
   for (const [texture, inputName] of inputTextureNames) {
     texture.setName(inputName);
   }
@@ -528,7 +528,7 @@ async function main() {
     });
 
   if (glbFiles.length === 0) {
-    console.log(`Nema GLB fajlova u: ${INPUT_DIR}`);
+    // console.log(`No GLB files found in: ${INPUT_DIR}`);
     return;
   }
 
@@ -537,13 +537,13 @@ async function main() {
   let createdMasks = 0;
   let failedModels = 0;
 
-  console.log(`Pronađeno GLB modela: ${glbFiles.length}`);
-  console.log(
-    `Texture size: ${options.textureSize}px; create masks: ${options.createMasks}; ID colors: ${options.idMaskColorCount}`,
-  );
+  // console.log(`GLB models found: ${glbFiles.length}`);
+  // console.log(
+  //   `Texture size: ${options.textureSize}px; create masks: ${options.createMasks}; ID colors: ${options.idMaskColorCount}`,
+  // );
 
   for (const inputPath of glbFiles) {
-    console.log(`\nModel: ${path.relative(INPUT_DIR, inputPath)}`);
+    // console.log(`\nModel: ${path.relative(INPUT_DIR, inputPath)}`);
 
     try {
       const result = await optimizeModel(io, inputPath, options);
@@ -551,29 +551,29 @@ async function main() {
       skippedTextures += result.skippedTextures;
       createdMasks += result.idMasks.masks;
 
-      console.log(`  Tekstura: ${result.textures}`);
-      console.log(`  Exterior ID maski: ${result.idMasks.masks}`);
-      console.log(`  ID šara: ${result.idMasks.palette.length}`);
-      console.log(
-        `  Zaštićenih logo/transparentnih piksela: ${result.idMasks.protectedPixels}`,
-      );
-      console.log(
-        `  Paleta: ${result.idMasks.palette
-          .map((color, index) => `${index + 1}=rgb(${color.join(",")})`)
-          .join("; ")}`,
-      );
-      console.log(`  Sačuvano: ${path.relative(PROJECT_ROOT, result.outputPath)}`);
+      // console.log(`  Textures: ${result.textures}`);
+      // console.log(`  Exterior ID masks: ${result.idMasks.masks}`);
+      // console.log(`  Pattern IDs: ${result.idMasks.palette.length}`);
+      // console.log(
+      //   `  Protected logo/transparent pixels: ${result.idMasks.protectedPixels}`,
+      // );
+      // console.log(
+      //   `  Palette: ${result.idMasks.palette
+      //     .map((color, index) => `${index + 1}=rgb(${color.join(",")})`)
+      //     .join("; ")}`,
+      // );
+      // console.log(`  Saved: ${path.relative(PROJECT_ROOT, result.outputPath)}`);
     } catch (error) {
       failedModels += 1;
-      console.error(`  Greška: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`  Error: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
-  console.log("\nRezultat:");
-  console.log(`  Modela: ${glbFiles.length - failedModels}/${glbFiles.length} uspešno`);
-  console.log(`  Smanjenih tekstura: ${resizedTextures}`);
-  console.log(`  Kreiranih exterior ID maski: ${createdMasks}`);
-  console.log(`  Preskočenih tekstura (<= ${options.textureSize}px ili bez slike): ${skippedTextures}`);
+  // console.log("\nResult:");
+  // console.log(`  Models: ${glbFiles.length - failedModels}/${glbFiles.length} successful`);
+  // console.log(`  Resized textures: ${resizedTextures}`);
+  // console.log(`  Created exterior ID masks: ${createdMasks}`);
+  // console.log(`  Skipped textures (<= ${options.textureSize}px or no image): ${skippedTextures}`);
 
   if (failedModels > 0) process.exitCode = 1;
 }

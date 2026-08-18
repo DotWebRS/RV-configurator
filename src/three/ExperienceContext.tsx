@@ -100,7 +100,7 @@ export function useExperienceRef() {
 
     if (!experienceRef) {
         throw new Error(
-            "useExperienceRef mora biti korišćen unutar ExperienceProvider-a.",
+            "useExperienceRef must be used within ExperienceProvider.",
         );
     }
 
@@ -112,7 +112,7 @@ export function useConfiguratorUi() {
 
     if (!context) {
         throw new Error(
-            "useConfiguratorUi mora biti korišćen unutar ExperienceProvider-a.",
+            "useConfiguratorUi must be used within ExperienceProvider.",
         );
     }
 

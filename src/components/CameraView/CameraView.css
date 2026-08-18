@@ -320,9 +320,21 @@
 
 }
 
+.camera-card img.camera-card-image-exterior{
+
+    object-fit:contain;
+
+    background:#0A1C35;
+
+}
+
 .camera-card-footer{
 
     height:30px;
+
+    padding:2px 6px;
+
+    box-sizing:border-box;
 
     display:flex;
 
@@ -336,7 +348,19 @@
 
     font-size:14px;
 
+    line-height:1.15;
+
+    text-align:center;
+
+    overflow-wrap:anywhere;
+
     font-family:'Open Sans',sans-serif;
+
+}
+
+.camera-card-footer-long{
+
+    font-size:11px;
 
 }
 

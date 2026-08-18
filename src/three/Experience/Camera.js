@@ -7,10 +7,10 @@ export default class Camera{
     constructor(){
         this.experience = new Experience();
         this.onDebugClick = () => {
-            console.log(`${Math.round((this.instance.position.x + Number.EPSILON) * 100) / 100}, ${Math.round((this.instance.position.y + Number.EPSILON) * 100) / 100}, ${Math.round((this.instance.position.z + Number.EPSILON) * 100) / 100}`);
-            console.log(`${Math.round((this.controls.target.x + Number.EPSILON) * 100) / 100}, ${Math.round((this.controls.target.y + Number.EPSILON) * 100) / 100}, ${Math.round((this.controls.target.z + Number.EPSILON) * 100) / 100}`);
-            console.log(this.instance);
-            console.log(this.controls);
+            // console.log(`${Math.round((this.instance.position.x + Number.EPSILON) * 100) / 100}, ${Math.round((this.instance.position.y + Number.EPSILON) * 100) / 100}, ${Math.round((this.instance.position.z + Number.EPSILON) * 100) / 100}`);
+            // console.log(`${Math.round((this.controls.target.x + Number.EPSILON) * 100) / 100}, ${Math.round((this.controls.target.y + Number.EPSILON) * 100) / 100}, ${Math.round((this.controls.target.z + Number.EPSILON) * 100) / 100}`);
+            // console.log(this.instance);
+            // console.log(this.controls);
         };
         document.body.addEventListener("click", this.onDebugClick);
         this.sizes = this.experience.sizes;
@@ -87,11 +87,11 @@ export default class Camera{
         this.controls.target.set(this.positions.right.target.x, this.positions.right.target.y, this.positions.right.target.z);
         this.controls.enabled = true;
         this.controls.enableRotate = true;
-        // Privremeno uklonjeno radi izvlačenja koordinata kamere:
+        // Temporarily disabled while collecting camera coordinates:
         // this.controls.enablePan = false;
         this.controls.enablePan = false;
         this.controls.enableDamping = true;
-        // Originalna ograničenja zumiranja, sačuvana za ponovno uključivanje:
+        // Original zoom limits, retained for future re-enabling:
         // this.controls.minDistance = this.zoomSettings.minDistance;
         // this.controls.maxDistance = this.zoomSettings.maxDistance;
         this.controls.minDistance = this.zoomSettings.minDistance;

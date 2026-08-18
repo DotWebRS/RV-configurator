@@ -120,9 +120,9 @@ export default class Environment{
     setHemisphereLight(){
         this.hemisphereLight = new THREE.HemisphereLight(
 
-            0xd8e2f0,   // boja neba
+            0xd8e2f0,   // Sky color
 
-            0x596574,   // boja poda
+            0x596574,   // Ground color
 
             0.9
 

@@ -26,6 +26,7 @@ const Viewer = () => {
         setActiveModelId,
         setSelectedFloorPlanId,
         viewMode,
+        setViewMode,
     } = useConfiguratorUi();
     const viewModeRef = useRef(viewMode);
     const getActualZoomMaximum = () => {
@@ -254,7 +255,7 @@ const Viewer = () => {
                 </div>
             )}
 
-            {/* DONJI LEVI KONTROLER */}
+            {/* BOTTOM-LEFT CONTROLS */}
             <div className="cursor-controls">
 
                 <button
@@ -330,7 +331,7 @@ const Viewer = () => {
                 <button
                     className="zoom-btn"
                     onClick={() => changeZoomBy(5)}
-                    aria-label="Povećaj zoom za 5%"
+                    aria-label="Increase zoom by 5%"
                 >
                     +
                 </button>
@@ -344,10 +345,13 @@ const Viewer = () => {
                         const experience = experienceRef.current;
 
                         if (!experience) {
-                            console.warn("Experience još nije inicijalizovan.");
+                            console.warn("Experience has not been initialized yet.");
                             return;
                         }
                         experience.resetTextureColors();
+                        setViewMode("Exterior");
+                        viewModeRef.current = "Exterior";
+                        experience.setCameraInteractionMode("Exterior");
                         experience.updateCameraView("right");
                         setActiveCameraView("Right View");
                     }}

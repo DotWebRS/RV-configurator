@@ -45,7 +45,7 @@ export const interiorRoomOptions: Record<InteriorRoomId, InteriorRoomOption> = {
     "bonus-room": { label: "Bonus Room", image: "/images/interior option view mode/bonus-room.webp" },
 };
 
-// Privremene vrednosti samo za novododate sobe. Zameni ih finalnim koordinatama po floorplan-u.
+// Temporary values for newly added rooms. Replace them with final coordinates for each floor plan.
 const placeholderRoomCamera = (): RoomCamera => ({
     cameraPosition: [0, 2.5, 0],
     target: [0, 2.5, 1],
@@ -76,8 +76,8 @@ export type ModelConfiguration = {
 
 const defaultFloorPlanImage = "/images/floor-plan.jpg";
 
-// OVDE UNOSIŠ FINALNE KOORDINATE.
-// Svaki floor plan ima potpuno nezavisne cameraPosition i target vrednosti.
+// ENTER THE FINAL COORDINATES HERE.
+// Each floor plan has completely independent cameraPosition and target values.
 export const floorPlanRoomCoordinates: Record<string, FloorPlanRooms> = {
     "elegante-33efs": {
         living: { cameraPosition: [-0.77, 2.51, -2.58], target: [-0.32, 2.48, -2.59] },

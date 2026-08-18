@@ -20,7 +20,7 @@ function parsePatternColors(mesh) {
             .filter(({ id, color }) => Number.isInteger(id) && id > 0 && HEX_COLOR.test(color));
     } catch (error) {
         console.warn(
-            `TextureChanger: mesh "${mesh.name}" ima neispravan rvPatternColors JSON.`,
+            `TextureChanger: mesh "${mesh.name}" has invalid rvPatternColors JSON.`,
             error,
         );
         return [];
@@ -76,7 +76,7 @@ export default class TextureChanger {
             const meshPatterns = parsePatternColors(mesh);
             if (meshPatterns.length === 0) {
                 console.warn(
-                    `TextureChanger: mesh "${mesh.name}" ima masked teksturu, ali nema rvPatternColors.`,
+                    `TextureChanger: mesh "${mesh.name}" has a masked texture but no rvPatternColors.`,
                 );
                 continue;
             }
@@ -87,7 +87,7 @@ export default class TextureChanger {
 
                 if (existing && existing.originalColor !== normalizedColor) {
                     console.warn(
-                        `TextureChanger: ID ${id} ima razliÄite osnovne boje (${existing.originalColor} i ${normalizedColor}). Koristi se prva vrednost.`,
+                        `TextureChanger: ID ${id} has conflicting base colors (${existing.originalColor} and ${normalizedColor}). The first value will be used.`,
                     );
                     continue;
                 }
@@ -104,7 +104,7 @@ export default class TextureChanger {
             for (const { material, masks } of maskedMaterials) {
                 if (masks.length > 1) {
                     console.warn(
-                        `TextureChanger: materijal "${material.name}" sadrÅ¾i viÅ¡e masked tekstura. Koristi se prva.`,
+                        `TextureChanger: material "${material.name}" contains multiple masked textures. The first one will be used.`,
                     );
                 }
 
@@ -119,7 +119,7 @@ export default class TextureChanger {
                 const existingMask = materialMasks.get(material);
                 if (existingMask && existingMask !== maskTexture) {
                     console.warn(
-                        `TextureChanger: materijal "${material.name}" koristi više ID maski.`,
+                        `TextureChanger: material "${material.name}" uses multiple ID masks.`,
                     );
                     continue;
                 }

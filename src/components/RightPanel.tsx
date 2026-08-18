@@ -13,10 +13,10 @@ type Upgrade = { id: string; name: string; price: number; image: string; restric
 type PreviewItem = { name: string; image: string; price?: number };
 type ContactForm = { firstName: string; lastName: string; phone: string; state: string; email: string; serviceConsent: boolean; marketingConsent: boolean };
 
-/* Premešteno u data.ts; ostavljeno samo u istoriji verzija.
+/* Moved to data.ts; retained only in version history.
 */
 const legacyFloorPlans = [
-    /* SaÄuvano za ponovno ukljuÄivanje Regent floor plan kartica:
+    /* Retained for re-enabling the Regent floor plan cards:
     { id: 1, name: "48FLB", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/Regent/models/48FLB/Regent Hauler Flyer_48FLB_(10707)_V7-optimized-2k.glb" },
     { id: 2, name: "49RH", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/Regent/models/49RH/Regent Hauler Flyer_49RH_F10-optimized-2k-rotated.glb" },
     */
@@ -310,7 +310,7 @@ export default function RightPanel() {
         };
 
         setPreparedPayload(payload);
-        console.log("Prepared Send My Build payload:", payload);
+        // console.log("Prepared Send My Build payload:", payload);
     };
 
     const choosePlan = async (plan: FloorPlan) => {
@@ -428,7 +428,7 @@ export default function RightPanel() {
                         <span className="upgrade-copy"><strong>{item.name}</strong><span>{item.price ? `+${money(item.price)}` : "Included"}</span></span>
                     </div>)}
                 </div>
-                {/* Color picker je privremeno isključen i sačuvan za ponovno uključivanje.
+                {/* The color picker is temporarily disabled and retained for future re-enabling.
                 {group === "Paint" && <div className="paint-panel">
                     <h3>Exterior Paint</h3>
                     <p>Select a color to customize the paint pattern.</p>
