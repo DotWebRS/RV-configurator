@@ -7,8 +7,7 @@ import {
     type ExperienceInstance,
     type PatternColor,
 } from "../three/ExperienceContext";
-import { getSelectionFromPath } from "../configuratorUrl";
-import { modelConfigurations } from "./data";
+import { getConfiguratorPath, getDefaultConfiguratorSelection, getSelectionFromPath } from "../configuratorUrl";
 
 const Viewer = () => {
 
@@ -96,7 +95,7 @@ const Viewer = () => {
         let unsubscribeZoom = () => {};
         let unsubscribeTextureColors = () => {};
         let removePopStateListener = () => {};
-        let loadedFloorPlanId = "elegante-33efs";
+        let loadedFloorPlanId = "regent-48flb";
 
         const createExperience = async () => {
             const { default: Experience } = await import('../three/Experience/Experience');
@@ -121,19 +120,26 @@ const Viewer = () => {
                 },
             );
 
-            await experience.whenInitialModelReady();
+            const initialModelLoaded = await experience.whenInitialModelReady();
 
             const loadSelectionFromUrl = async () => {
-                const selection = getSelectionFromPath(window.location.pathname) ?? {
-                    model: modelConfigurations[0],
-                    floorPlan: modelConfigurations[0].floorPlans[0],
-                };
+                const pathSelection = getSelectionFromPath(window.location.pathname);
+                const selection = pathSelection ?? getDefaultConfiguratorSelection();
+                let modelLoaded = initialModelLoaded;
 
                 setActiveModelId(selection.model.id);
                 setSelectedFloorPlanId(selection.floorPlan.id);
                 if (selection.floorPlan.id !== loadedFloorPlanId) {
-                    await experience.changeRV(selection.floorPlan.modelPath);
-                    loadedFloorPlanId = selection.floorPlan.id;
+                    modelLoaded = await experience.changeRV(selection.floorPlan.modelPath);
+                    if (modelLoaded) loadedFloorPlanId = selection.floorPlan.id;
+                }
+
+                if (!pathSelection && modelLoaded) {
+                    window.history.replaceState(
+                        null,
+                        "",
+                        getConfiguratorPath(selection.model, selection.floorPlan),
+                    );
                 }
             };
 

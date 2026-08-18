@@ -5,7 +5,7 @@ import {
     useConfiguratorUi,
     useExperienceRef,
 } from "../../three/ExperienceContext";
-import { getFloorPlan, type RoomCamera } from "../data";
+import { getFloorPlan, interiorRoomOptions, type InteriorRoomId, type RoomCamera } from "../data";
 
 
 const CameraView = () => {
@@ -22,17 +22,22 @@ const CameraView = () => {
     } = useConfiguratorUi();
     const selectedPlan = getFloorPlan(activeModelId, selectedFloorPlanId);
 
+    const interiorViews = selectedPlan
+        ? (Object.entries(selectedPlan.rooms) as [InteriorRoomId, RoomCamera][]).map(([camera, coordinates]) => ({
+            ...interiorRoomOptions[camera],
+            camera,
+            coordinates,
+        }))
+        : [];
     const views = viewMode === "Interior"
-        ? [
-            { label: "Kitchen", image: "/images/interior option view mode/kitchen.jpg", camera: "kitchen", coordinates: selectedPlan?.rooms.kitchen },
-            { label: "Living area", image: "/images/interior option view mode/living.jpg", camera: "livingroom", coordinates: selectedPlan?.rooms.livingroom },
-            { label: "Bedroom", image: "/images/interior option view mode/bedroom.jpg", camera: "bedroom", coordinates: selectedPlan?.rooms.bedroom },
-            { label: "Bathroom", image: "/images/interior option view mode/bathroom.jpg", camera: "bathroom", coordinates: selectedPlan?.rooms.bathroom },
-        ]
-        : ["Front View", "Back View", "Left View", "Right View"].map((label) => ({
-            label,
-            image: "/images/card-image.png",
-            camera: label.split(" ")[0].toLowerCase(),
+        ? interiorViews
+        : [
+            { label: "Front View", image: "/images/exterior option view mode/frontview.png", camera: "front" },
+            { label: "Back View", image: "/images/exterior option view mode/backview.png", camera: "back" },
+            { label: "Left View", image: "/images/exterior option view mode/leftview.png", camera: "left" },
+            { label: "Right View", image: "/images/exterior option view mode/rightview.png", camera: "right" },
+        ].map((view) => ({
+            ...view,
             coordinates: undefined as RoomCamera | undefined,
         }));
 

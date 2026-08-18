@@ -1,7 +1,7 @@
 "use client";
 
 import { useConfiguratorUi, useExperienceRef } from "../../three/ExperienceContext";
-import { getFloorPlan } from "../data";
+import { getFloorPlan, interiorRoomOptions, type InteriorRoomId, type RoomCamera } from "../data";
 
 const viewModes = [
     {
@@ -24,10 +24,18 @@ const ViewMode = () => {
         const mode = viewModes[index].label as "Interior" | "Exterior";
         setViewMode(mode);
         experienceRef.current?.setCameraInteractionMode(mode);
-        const initialView = mode === "Interior" ? "Kitchen" : "Right View";
+        const selectedPlan = getFloorPlan(activeModelId, selectedFloorPlanId);
+        const firstInteriorRoom = selectedPlan
+            ? (Object.entries(selectedPlan.rooms) as [InteriorRoomId, RoomCamera][])[0]
+            : undefined;
+        const initialView = mode === "Interior" && firstInteriorRoom
+            ? interiorRoomOptions[firstInteriorRoom[0]].label
+            : "Right View";
         setActiveCameraView(initialView);
-        const kitchenCoordinates = getFloorPlan(activeModelId, selectedFloorPlanId)?.rooms.kitchen;
-        experienceRef.current?.updateCameraView(mode === "Interior" ? "kitchen" : "right", mode === "Interior" ? kitchenCoordinates : undefined);
+        experienceRef.current?.updateCameraView(
+            mode === "Interior" && firstInteriorRoom ? firstInteriorRoom[0] : "right",
+            mode === "Interior" ? firstInteriorRoom?.[1] : undefined,
+        );
     };
 
     return (

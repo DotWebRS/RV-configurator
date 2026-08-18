@@ -5,6 +5,12 @@ export type ConfiguratorSelection = {
     floorPlan: FloorPlan;
 };
 
+export const getDefaultConfiguratorSelection = (): ConfiguratorSelection => {
+    const model = modelConfigurations.find((item) => item.id === "regent")!;
+    const floorPlan = model.floorPlans.find((plan) => plan.id === "regent-48flb")!;
+    return { model, floorPlan };
+};
+
 const normalizeSegment = (value: string) =>
     decodeURIComponent(value).trim().toLowerCase();
 
