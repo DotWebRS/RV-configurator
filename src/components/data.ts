@@ -221,7 +221,7 @@ export const modelConfigurations: ModelConfiguration[] = [
         floorPlans: [
             createFloorPlan({ id: "elite-39fb", name: "39FB", modelPath: "threejs-assets/Elite/models/39FB/Luxe_elite_39FB.glb", image: "/images/floorplans/Elite 39FB.jpg", rooms: floorPlanRoomCoordinates["elite-39fb"] }),
             createFloorPlan({ id: "elite-42rl", name: "42RL", modelPath: "threejs-assets/Elite/models/42RL/Luxe_elite_LF_42RL.glb", image: "/images/floorplans/Elite 42RL.jpg", rooms: floorPlanRoomCoordinates["elite-42rl"] }),
-            createFloorPlan({ id: "elite-46tb", name: "46TB", modelPath: "threejs-assets/Elite/models/46TB/Luxe_elite_LF_46TB.glb", image: "/images/floorplans/Elite 46TB.jpg", rooms: floorPlanRoomCoordinates["elite-46tb"] }),
+            createFloorPlan({ id: "elite-46tb", name: "46TB", modelPath: "threejs-assets/Elite/models/46TB/Luxe_elite_LF_46TB.glb", image: "/images/floorplans/Elite 46TB.png", rooms: floorPlanRoomCoordinates["elite-46tb"] }),
             createFloorPlan({ id: "elite-46rkb", name: "46RKB", modelPath: "threejs-assets/Elite/models/46RKB/Luxe_elite_46RKB.glb", image: "/images/floorplans/Elite 46RKB.webp", rooms: floorPlanRoomCoordinates["elite-46rkb"] }),
         ],
     },
