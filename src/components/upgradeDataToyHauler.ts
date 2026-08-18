@@ -83,7 +83,7 @@ export const toyHaulerUpgradeSections: UpgradeSection[] = [
           "48FB"
         ]
       },
-      {
+      /* {
         "id": "toy-hauler-decor-4",
         "name": "Chelsea Gray",
         "price": 2999,
@@ -94,7 +94,7 @@ export const toyHaulerUpgradeSections: UpgradeSection[] = [
           "47FB",
           "48FB"
         ]
-      }
+      } */
     ]
   },
   {
@@ -922,4 +922,3 @@ export const toyHaulerUpgradeSections: UpgradeSection[] = [
     ]
   }
 ];
-

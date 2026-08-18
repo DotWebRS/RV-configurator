@@ -77,7 +77,7 @@ export const regentUpgradeSections: UpgradeSection[] = [
           "49RH"
         ]
       },
-      {
+      /* {
         "id": "regent-decor-4",
         "name": "Chelsea Gray",
         "price": 0,
@@ -87,7 +87,7 @@ export const regentUpgradeSections: UpgradeSection[] = [
           "48FLB",
           "49RH"
         ]
-      }
+      } */
     ]
   },
   {
@@ -455,4 +455,3 @@ export const regentUpgradeSections: UpgradeSection[] = [
     ]
   }
 ];
-

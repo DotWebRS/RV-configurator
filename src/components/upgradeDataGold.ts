@@ -88,7 +88,7 @@ export const goldUpgradeSections: UpgradeSection[] = [
           "38GFB"
         ]
       },
-      {
+      /* {
         "id": "gold-decor-4",
         "name": "Chelsea Gray",
         "price": 2999,
@@ -98,7 +98,7 @@ export const goldUpgradeSections: UpgradeSection[] = [
           "35GRS",
           "38GFB"
         ]
-      }
+      } */
     ]
   },
   {
@@ -710,4 +710,3 @@ export const goldUpgradeSections: UpgradeSection[] = [
     ]
   }
 ];
-

@@ -71,7 +71,7 @@ export const eleganteUpgradeSections: UpgradeSection[] = [
           "33EFS"
         ]
       },
-      {
+      /* {
         "id": "elegante-decor-4",
         "name": "Chelsea Gray",
         "price": 2999,
@@ -80,7 +80,7 @@ export const eleganteUpgradeSections: UpgradeSection[] = [
         "compatibility": [
           "33EFS"
         ]
-      }
+      } */
     ]
   },
   {
@@ -630,4 +630,3 @@ export const eleganteUpgradeSections: UpgradeSection[] = [
     ]
   }
 ];
-
