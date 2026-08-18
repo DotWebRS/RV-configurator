@@ -2,6 +2,7 @@
 
 import { modelConfigurations } from "./data";
 import { useConfiguratorUi, useExperienceRef } from "../three/ExperienceContext";
+import { pushConfiguratorUrl } from "../configuratorUrl";
 
 const ChooseModel = () => {
     const experienceRef = useExperienceRef();
@@ -20,10 +21,15 @@ const ChooseModel = () => {
         const firstPlan = model?.floorPlans[0];
         const experience = experienceRef.current;
 
-        if (!model || !firstPlan || !experience || isModelLoading || modelId === activeModelId) return;
+        if (!model || !firstPlan || !experience || isModelLoading) return;
+        if (modelId === activeModelId) {
+            pushConfiguratorUrl(model, firstPlan);
+            return;
+        }
 
         setActiveModelId(model.id);
         setSelectedFloorPlanId(firstPlan.id);
+        pushConfiguratorUrl(model, firstPlan);
         setViewMode("Exterior");
         experience.setCameraInteractionMode("Exterior");
         setActiveCameraView("Right View");

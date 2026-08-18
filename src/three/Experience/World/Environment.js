@@ -18,7 +18,10 @@ export default class Environment{
         this.setSunLight();
         this.setSurroundLights();
         this.setHemisphereLight();
-        this.setHDR();
+        this.hdrRequestId = 0;
+        this.currentHDR = null;
+        this.pendingHDR = null;
+        this.setHDR("horn-koppe_spring_1k.hdr");
     }
     setSunLight(){
         this.sunLight = new THREE.DirectionalLight('#fffaf2', 1.35);
@@ -137,27 +140,49 @@ export default class Environment{
         }
     }
 
-    setHDR(){
+    setHDR(fileName){
+        if (this.destroyed) return;
+        if (fileName === this.currentHDR) {
+            if (this.pendingHDR && this.pendingHDR !== fileName) {
+                this.hdrRequestId += 1;
+                this.pendingHDR = null;
+            }
+            return;
+        }
+        if (fileName === this.pendingHDR) return;
+
+        const requestId = ++this.hdrRequestId;
+        this.pendingHDR = fileName;
+
         new RGBELoader()
         .setPath("/threejs-assets/hdr/")
-        .load("horn-koppe_spring_1k.hdr", (texture) => {
-            if (this.destroyed) {
+        .load(fileName, (texture) => {
+            if (this.destroyed || requestId !== this.hdrRequestId) {
                 texture.dispose();
                 return;
             }
 
+            const previousTexture = this.environmentTexture;
             this.environmentTexture = texture;
             this.environmentTexture.mapping = THREE.EquirectangularReflectionMapping;
+            this.currentHDR = fileName;
+            this.pendingHDR = null;
 
             this.scene.environment = this.environmentTexture;
             this.scene.environmentIntensity = 1.5;
             this.scene.background = null;
+
+            if (previousTexture && previousTexture !== texture) previousTexture.dispose();
+        }, undefined, (error) => {
+            if (requestId === this.hdrRequestId) this.pendingHDR = null;
+            console.error(`HDR load failed: ${fileName}`, error);
         });
     }
 
     destroy(){
         if (this.destroyed) return;
         this.destroyed = true;
+        this.hdrRequestId += 1;
 
         this.sunLight?.removeFromParent();
         this.sunLight?.target?.removeFromParent();
@@ -178,6 +203,8 @@ export default class Environment{
         }
         this.environmentTexture?.dispose();
         this.environmentTexture = null;
+        this.currentHDR = null;
+        this.pendingHDR = null;
         this.sunLight = null;
         this.surroundLights = null;
         this.hemisphereLight = null;

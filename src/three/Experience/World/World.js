@@ -16,7 +16,7 @@ export default class World{
         this.onResourcesReady = ()=>{
             if(this.destroyed) return;
             this.envronment = new Environment();
-            this.rv = new RV("threejs-assets/Elegante/models/elegante test.glb");
+            this.rv = new RV("/threejs-assets/Elegante/models/elegante test.glb");
             this.rv.ready.then((success) => {
                 this.finishReady(success);
             });

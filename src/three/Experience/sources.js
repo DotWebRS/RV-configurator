@@ -2,6 +2,6 @@ export default [
     {
         name: 'logoTexture',
         type: 'texture',
-        path: 'threejs-assets/logo.jpeg'
+        path: '/threejs-assets/logo.jpeg'
     }
 ];
