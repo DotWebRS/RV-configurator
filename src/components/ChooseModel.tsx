@@ -4,6 +4,11 @@ import { modelConfigurations } from "./data";
 import { useConfiguratorUi, useExperienceRef } from "../three/ExperienceContext";
 import { pushConfiguratorUrl } from "../configuratorUrl";
 
+const modelDisplayOrder = ["regent", "elite", "gold", "toy-hauler", "elegante"];
+const orderedModelConfigurations = modelDisplayOrder
+    .map((modelId) => modelConfigurations.find((model) => model.id === modelId))
+    .filter((model): model is (typeof modelConfigurations)[number] => Boolean(model));
+
 const ChooseModel = () => {
     const experienceRef = useExperienceRef();
     const {
@@ -47,7 +52,7 @@ const ChooseModel = () => {
         <div className="choose-model">
             <p className="choose-model-title">Choose Model</p>
             <div className="choose-model-tabs">
-                {modelConfigurations.map((model) => (
+                {orderedModelConfigurations.map((model) => (
                     <button
                         key={model.id}
                         disabled={model.floorPlans.length === 0 || isModelLoading}

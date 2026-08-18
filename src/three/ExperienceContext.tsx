@@ -65,8 +65,8 @@ const ConfiguratorUiContext = createContext<ConfiguratorUiContextValue | null>(n
 export function ExperienceProvider({ children }: { children: ReactNode }) {
     const experienceRef = useRef<ExperienceInstance | null>(null);
     const [activeCameraView, setActiveCameraView] = useState("Right View");
-    const [activeModelId, setActiveModelId] = useState("elegante");
-    const [selectedFloorPlanId, setSelectedFloorPlanId] = useState("elegante-33efs");
+    const [activeModelId, setActiveModelId] = useState("regent");
+    const [selectedFloorPlanId, setSelectedFloorPlanId] = useState("regent-48flb");
     const [viewMode, setViewMode] = useState<"Interior" | "Exterior">("Exterior");
     const [isModelLoading, setModelLoading] = useState(true);
     const [patternColors, setPatternColors] = useState<PatternColor[]>([]);

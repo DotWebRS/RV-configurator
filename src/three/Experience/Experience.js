@@ -49,7 +49,7 @@ export default class Experience{
 
         if(this.cameraInteractionMode === "Interior"){
             this.world?.envronment?.setHDR(
-                view === "bathroom"
+                view.includes("bath")
                     ? "en_suite_1k.hdr"
                     : "relax_inn_seaview_suite_1k.hdr"
             );
