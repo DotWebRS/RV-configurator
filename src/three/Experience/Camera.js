@@ -23,6 +23,10 @@ export default class Camera{
             maxDistance: new THREE.Vector3(-36, -2, 15)
                 .distanceTo(new THREE.Vector3(0.5, 2.25, 1.26))
         };
+        this.interiorZoomSettings = {
+            minDistance: 0.15,
+            maxDistance: 2.5
+        };
         this.positions = {
             "top" : {
                 "camera" : new THREE.Vector3(0.5, 15.7, 1.26),
@@ -104,9 +108,9 @@ export default class Camera{
         this.controls.enablePan = false;
 
         if (mode === "Interior") {
-            this.controls.enableZoom = false;
-            this.controls.minDistance = 0;
-            this.controls.maxDistance = Infinity;
+            this.controls.enableZoom = true;
+            this.controls.minDistance = this.interiorZoomSettings.minDistance;
+            this.controls.maxDistance = this.interiorZoomSettings.maxDistance;
             this.controls.minPolarAngle = 0;
             this.controls.maxPolarAngle = Math.PI;
         } else {
@@ -154,15 +158,21 @@ export default class Camera{
         return window.matchMedia("(max-width: 768px)").matches;
     }
 
-    getDistanceForZoomPercent(percent) {
+    getDistanceForZoomPercent(percent, settings = this.zoomSettings) {
         const normalizedPercent = THREE.MathUtils.clamp(percent, 0, 100) / 100;
-        const { minDistance, maxDistance } = this.zoomSettings;
+        const { minDistance, maxDistance } = settings;
 
         return THREE.MathUtils.lerp(
             maxDistance,
             minDistance,
             normalizedPercent
         );
+    }
+
+    getActiveZoomSettings() {
+        return this.interactionMode === "Interior"
+            ? this.interiorZoomSettings
+            : this.zoomSettings;
     }
 
     getViewUp(view) {
@@ -196,7 +206,7 @@ export default class Camera{
         const currentUp = new THREE.Vector3();
         const progress = { value: 0 };
         const startDistance = startOffset.length();
-        const endDistance = this.isMobileViewport()
+        const endDistance = this.isMobileViewport() && this.interactionMode !== "Interior"
             ? this.getDistanceForZoomPercent(60)
             : endOffset.length();
         const finalPosition = endTarget.clone()
@@ -257,12 +267,15 @@ export default class Camera{
         });
     }
     setZoomPercent(percent) {
-        if (!this.instance || !this.controls || this.interactionMode === "Interior") {
+        if (!this.instance || !this.controls) {
             return;
         }
 
         const clampedPercent = THREE.MathUtils.clamp(percent, 0, 100);
-        const newDistance = this.getDistanceForZoomPercent(clampedPercent);
+        const newDistance = this.getDistanceForZoomPercent(
+            clampedPercent,
+            this.getActiveZoomSettings()
+        );
 
         const direction = new THREE.Vector3()
             .subVectors(this.instance.position, this.controls.target);
@@ -288,7 +301,7 @@ export default class Camera{
         const currentDistance = this.instance.position.distanceTo(
             this.controls.target
         );
-        const { minDistance, maxDistance } = this.zoomSettings;
+        const { minDistance, maxDistance } = this.getActiveZoomSettings();
 
         const percent = THREE.MathUtils.mapLinear(
             currentDistance,
@@ -336,5 +349,6 @@ export default class Camera{
         this.viewTimeline = null;
         this.activeView = null;
         this.interactionMode = null;
+        this.interiorZoomSettings = null;
     }
 }

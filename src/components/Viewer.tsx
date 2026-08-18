@@ -27,11 +27,14 @@ const Viewer = () => {
         setSelectedFloorPlanId,
         viewMode,
     } = useConfiguratorUi();
-    const getActualZoomMaximum = () =>
-        typeof window !== "undefined"
-        && window.matchMedia("(max-width: 768px)").matches
-            ? 60
-            : 100;
+    const viewModeRef = useRef(viewMode);
+    const getActualZoomMaximum = () => {
+        if (viewModeRef.current === "Interior") return 100;
+        return typeof window !== "undefined"
+            && window.matchMedia("(max-width: 768px)").matches
+                ? 60
+                : 100;
+    };
     const displayToActualZoom = (displayPercent: number) =>
         displayPercent * getActualZoomMaximum() / 100;
     const actualToDisplayZoom = (actualPercent: number) =>
@@ -41,7 +44,6 @@ const Viewer = () => {
 
     };
     const applyZoomPercent = (value: number) => {
-        if (viewMode === "Interior") return;
         const nextPercent = Math.min(100, Math.max(0, value));
         setZoomPercent(String(Math.round(nextPercent)));
         experienceRef.current?.setZoomPercent(displayToActualZoom(nextPercent));
@@ -57,6 +59,10 @@ const Viewer = () => {
     }, [zoomPercent]);
 
     useEffect(() => {
+        viewModeRef.current = viewMode;
+    }, [viewMode]);
+
+    useEffect(() => {
         const mobileQuery = window.matchMedia("(max-width: 768px)");
         const handleViewportChange = () => {
             const displayPercent = Number(zoomPercentRef.current);
@@ -64,7 +70,11 @@ const Viewer = () => {
             if (!Number.isFinite(displayPercent)) return;
 
             experienceRef.current?.setZoomPercent(
-                displayPercent * (mobileQuery.matches ? 60 : 100) / 100,
+                displayPercent * (
+                    viewModeRef.current === "Interior"
+                        ? 100
+                        : mobileQuery.matches ? 60 : 100
+                ) / 100,
             );
         };
 
@@ -277,7 +287,6 @@ const Viewer = () => {
             <div className="zoom-controls">
                 <button
                     className="zoom-btn"
-                    disabled={viewMode === "Interior"}
                     onClick={() => changeZoomBy(-5)}
                     aria-label="Smanji zoom za 5%"
                 >
@@ -292,7 +301,6 @@ const Viewer = () => {
                         max="100"
                         step="5"
                         value={zoomPercent}
-                        disabled={viewMode === "Interior"}
                         onChange={(event) => {
                             const value = event.target.value;
                             setZoomPercent(value);
@@ -321,7 +329,6 @@ const Viewer = () => {
 
                 <button
                     className="zoom-btn"
-                    disabled={viewMode === "Interior"}
                     onClick={() => changeZoomBy(5)}
                     aria-label="Povećaj zoom za 5%"
                 >

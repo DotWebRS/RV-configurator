@@ -54,6 +54,7 @@ const placeholderRoomCamera = (): RoomCamera => ({
 export type FloorPlan = {
     id: string;
     name: string;
+    basePrice: number;
     height: string;
     length: string;
     width: string;
@@ -167,6 +168,26 @@ export const floorPlanRoomCoordinates: Record<string, FloorPlanRooms> = {
     },
 };
 
+type FloorPlanSpecifications = Pick<
+    FloorPlan,
+    "basePrice" | "length" | "width" | "height" | "gvwr" | "fresh" | "grey" | "black"
+>;
+
+const floorPlanSpecifications: Record<string, FloorPlanSpecifications> = {
+    "elegante-33efs": { basePrice: 174100, length: "33'11\"", width: "8'5\"", height: "13'1\"", gvwr: "18,500", fresh: "75 gal", grey: "80 gal", black: "40 gal" },
+    "gold-35grs": { basePrice: 188358, length: "36'9\"", width: "8'5\"", height: "13'3\"", gvwr: "21,000", fresh: "100 gal", grey: "80 gal", black: "40 gal" },
+    "gold-38gfb": { basePrice: 194479, length: "39'9\"", width: "8'5\"", height: "13'3\"", gvwr: "21,000", fresh: "100 gal", grey: "80 gal", black: "80 gal" },
+    "elite-39fb": { basePrice: 226979, length: "40'10\"", width: "8'5\"", height: "13'3\"", gvwr: "24,000", fresh: "100 gal", grey: "80 gal", black: "80 gal" },
+    "elite-42rl": { basePrice: 234780, length: "43'10\"", width: "8'5\"", height: "13'3\"", gvwr: "24,000", fresh: "100 gal", grey: "80 gal", black: "40 gal" },
+    "elite-46rkb": { basePrice: 279980, length: "48'", width: "8'5\"", height: "13'3\"", gvwr: "27,000", fresh: "100 gal", grey: "80 gal", black: "80 gal" },
+    "elite-46tb": { basePrice: 282980, length: "48'", width: "8'5\"", height: "13'3\"", gvwr: "27,000", fresh: "100 gal", grey: "80 gal", black: "80 gal" },
+    "toy-hauler-46fb": { basePrice: 237390, length: "48'2\"", width: "8'5\"", height: "13'6\"", gvwr: "27,000", fresh: "100 gal", grey: "80 gal", black: "40 gal" },
+    "toy-hauler-47fb": { basePrice: 235889, length: "48'2\"", width: "8'5\"", height: "13'6\"", gvwr: "27,000", fresh: "100 gal", grey: "80 gal", black: "40 gal" },
+    "toy-hauler-48fb": { basePrice: 235238, length: "48'2\"", width: "8'5\"", height: "13'6\"", gvwr: "27,000", fresh: "100 gal", grey: "80 gal", black: "40 gal" },
+    "regent-48flb": { basePrice: 309980, length: "48'", width: "8'5\"", height: "13'3\"", gvwr: "29,999", fresh: "100 gal", grey: "80 gal", black: "80 gal" },
+    "regent-49rh": { basePrice: 277895, length: "48'", width: "8'5\"", height: "13'3\"", gvwr: "28,000", fresh: "100 gal", grey: "80 gal", black: "80 gal" },
+};
+
 type FloorPlanInput =
     Pick<FloorPlan, "id" | "name" | "modelPath" | "rooms">
     & Partial<Omit<FloorPlan, "id" | "name" | "modelPath" | "rooms">>;
@@ -177,33 +198,20 @@ const createFloorPlan = ({
     modelPath,
     rooms,
     image = defaultFloorPlanImage,
-    height = "13'5\"",
-    length = "33'",
-    width = "8'6\"",
-    gvwr = "16,000",
-    grey = "40 gal",
-    black = "40 gal",
-    fresh = "75 gal",
 }: FloorPlanInput): FloorPlan => ({
     id,
     name,
     modelPath: modelPath.startsWith("/") ? modelPath : `/${modelPath}`,
     rooms,
     image,
-    height,
-    length,
-    width,
-    gvwr,
-    grey,
-    black,
-    fresh,
+    ...floorPlanSpecifications[id],
 });
 
 export const modelConfigurations: ModelConfiguration[] = [
     {
         id: "elegante",
         name: "Luxe Elegante",
-        basePrice: 176745,
+        basePrice: 174100,
         floorPlans: [
             createFloorPlan({
                 id: "elegante-33efs",
@@ -217,7 +225,7 @@ export const modelConfigurations: ModelConfiguration[] = [
     {
         id: "elite",
         name: "Luxe Elite",
-        basePrice: 176745, // TODO: zameniti tačnom Elite cenom.
+        basePrice: 226979,
         floorPlans: [
             createFloorPlan({ id: "elite-39fb", name: "39FB", modelPath: "threejs-assets/Elite/models/39FB/Luxe_elite_39FB.glb", image: "/images/floorplans/Elite 39FB.jpg", rooms: floorPlanRoomCoordinates["elite-39fb"] }),
             createFloorPlan({ id: "elite-42rl", name: "42RL", modelPath: "threejs-assets/Elite/models/42RL/Luxe_elite_LF_42RL.glb", image: "/images/floorplans/Elite 42RL.jpg", rooms: floorPlanRoomCoordinates["elite-42rl"] }),
@@ -228,7 +236,7 @@ export const modelConfigurations: ModelConfiguration[] = [
     {
         id: "gold",
         name: "Luxe Gold",
-        basePrice: 176745, // TODO: zameniti tačnom Gold cenom.
+        basePrice: 188358,
         floorPlans: [
             createFloorPlan({ id: "gold-35grs", name: "35GRS", modelPath: "threejs-assets/Gold/models/35GRS/Luxe_Gold_35GRS.glb", image: "/images/floorplans/Gold 35GRS.png", rooms: floorPlanRoomCoordinates["gold-35grs"] }),
             createFloorPlan({ id: "gold-38gfb", name: "38GFB", modelPath: "threejs-assets/Gold/models/38GFB/Luxe_Gold_38GFB.glb", image: "/images/floorplans/Gold 38GFB.jpg", rooms: floorPlanRoomCoordinates["gold-38gfb"] }),
@@ -237,7 +245,7 @@ export const modelConfigurations: ModelConfiguration[] = [
     {
         id: "toy-hauler",
         name: "Luxe Toy Hauler",
-        basePrice: 176745, // TODO: zameniti tačnom Toy Hauler cenom.
+        basePrice: 237390,
         floorPlans: [
             createFloorPlan({ id: "toy-hauler-46fb", name: "46FB", modelPath: "threejs-assets/Toy Hauler/models/46FB/luxeTH46fb.glb", image: "/images/floorplans/Toy hauler 46FB.png", rooms: floorPlanRoomCoordinates["toy-hauler-46fb"] }),
             createFloorPlan({ id: "toy-hauler-47fb", name: "47FB", modelPath: "threejs-assets/Toy Hauler/models/47FB/luxeTH47fb.glb", image: "/images/floorplans/Toy hauler 47FB.png", rooms: floorPlanRoomCoordinates["toy-hauler-47fb"] }),
@@ -247,7 +255,7 @@ export const modelConfigurations: ModelConfiguration[] = [
     {
         id: "regent",
         name: "Luxe Regent",
-        basePrice: 176745, // TODO: zameniti tačnom Regent cenom.
+        basePrice: 309980,
         floorPlans: [
             createFloorPlan({ id: "regent-48flb", name: "48FLB", modelPath: "threejs-assets/Regent/models/48FLB/Regent Hauler Flyer_48FLB_(10707)_V7-optimized-2k.glb", image: "/images/floorplans/Regent 48FLB.jpg", rooms: floorPlanRoomCoordinates["regent-48flb"] }),
             createFloorPlan({ id: "regent-49rh", name: "49RH", modelPath: "threejs-assets/Regent/models/49RH/Regent Hauler Flyer_49RH_F10-optimized-2k-rotated.glb", image: "/images/floorplans/Regent 49RH.png", rooms: floorPlanRoomCoordinates["regent-49rh"] }),

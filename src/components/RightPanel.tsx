@@ -7,8 +7,9 @@ import { useConfiguratorUi, useExperienceRef } from "../three/ExperienceContext"
 import { getModelConfiguration, type FloorPlan } from "./data";
 import "./UpgradeSteps.css";
 import { pushConfiguratorUrl } from "../configuratorUrl";
+import { getUpgradeGroups } from "./upgradeData";
 
-type Upgrade = { id: string; name: string; price: number; image: string };
+type Upgrade = { id: string; name: string; price: number; image: string; restriction?: string; compatibility?: string[] };
 type PreviewItem = { name: string; image: string; price?: number };
 type ContactForm = { firstName: string; lastName: string; phone: string; state: string; email: string; serviceConsent: boolean; marketingConsent: boolean };
 
@@ -22,55 +23,9 @@ const legacyFloorPlans = [
     { id: 3, name: "33EFS", height: "13'5\"", length: "33'", width: "8'6\"", gvwr: "16,000", grey: "40 gal", black: "40 gal", fresh: "75 gal", modelPath: "threejs-assets/Elegante/models/elegante test.glb" },
 ];
 
-const upgradeGroups: Record<string, Upgrade[]> = {
-    Interior: [
-        ["raised-style-cabinet", "Raised Style Cabinet", 1200, "raised-style-cabinet.webp"],
-        ["shaker-style-cabinet", "Shaker Style Cabinet", 1200, "shaker-style-cabinet.webp"],
-        ["water-filter", "3 Stage Water Filter", 300, "3-stage-water-filter.webp"],
-        ["marine-flooring", "Marine Grade Flooring IPO Carpet", 900, "marine-grade-flooring-ipo-carpet.jpg"],
-        ["soft-touch-walls", "Soft Touch Walls", 4000, "soft-touch-walls.webp"],
-        ["lambright", "Lambright Custom Furniture", 3800, "lambright-custom-furniture.webp"],
-        ["televator", "Televator", 950, "televator.webp"],
-        ["washer-dryer", "Washer and Dryer Stackable", 2500, "washer-and-dryer-stackable.webp"],
-        ["wine-cooler", "Wine Cooler", 950, "wine-cooler.webp"],
-        ["silverware", "Silverware Drawer Insert", 150, "silverware-drawer-insert.webp"],
-    ].map(([id, name, price, file]) => ({ id, name, price, image: `/images/interior/${file}` })) as Upgrade[],
-    Exterior: [
-        ["chairs", "2 Folding Chairs", 200, "2-folding-chairs.webp"], ["receiver", "2\" Rear Hitch Receiver", 450, "2-rear-hitch-receiver-300-lbs-max.jpg"],
-        ["engineering", "Custom Engineering Fee", 1200, "custom-engineering-fee-mandatory-on-all-special-builds.jpg"], ["awning", "Dinette Patio Awning w/ LED Lighting", 1800, "dinette-patio-awning-w-led-lighting.png"],
-        ["gen-y", "Gen-Y Hitch Pin", 650, "gen-y-hitch-pin.webp"], ["generator", "Generator Prep", 950, "generator-prep.jpg"],
-        ["keyless", "Keyless Entry Door", 475, "keyless-entry-door-includes-key-fob.webp"], ["mor-ryde", "MORryde Tray Slide", 750, "mor-ryde-tray-slide.webp"],
-        ["entertainment", "Outside Entertainment Center", 2200, "outside-entertainment-center-includes-buffet-table.webp"], ["sewer", "Sewer Hose Holder", 125, "sewer-hose-holder-per.webp"],
-        ["toppers", "Slide-out Toppers", 1400, "slide-out-toppers-6.jpg"], ["paint", "Slide Room Paint", 950, "slide-room-paint-6.webp"],
-        ["stairs", "Step Above Pullout Entry Stair", 650, "step-above-pullout-entry-stair.webp"], ["silks", "Window Silks", 500, "window-silks.webp"],
-    ].map(([id, name, price, file]) => ({ id, name, price, image: `/images/exterior/${file}` })) as Upgrade[],
-    Bathrooms: [
-        ["macerator", "Macerator Toilet", 950, "macerator-toilet-per.webp"], ["bath-fan", "Fantastic Fan w/ Rain Sensor", 425, "fantastic-fan-w-rain-sensor-kitchen.webp"],
-    ].map(([id, name, price, file]) => ({ id, name, price, image: `/images/bathrooms/${file}` })) as Upgrade[],
-    "Kitchen & Livingroom": [
-        ["oven", "24\" Residential Oven IPO Induction", 1600, "24-residential-oven-ipo-induction.webp"], ["dishwasher", "Dishwasher", 1200, "dishwasher.webp"],
-        ["kitchen-fan", "Fantastic Fan w/ Rain Sensor", 425, "fantastic-fan-w-rain-sensor-kitchen.webp"], ["countertop", "Flip-up Countertop", 350, "flip-up-countertop.webp"],
-        ["buffet", "Solid Surface Countertop on Buffet", 750, "solid-surface-countertop-on-buffet.jpg"], ["sponge", "Tilt-out Sponge Tray", 150, "tiltout-sponge-tray.jpg"],
-    ].map(([id, name, price, file]) => ({ id, name, price, image: `/images/kitchen-livingroom/${file}` })) as Upgrade[],
-    Decor: [{ id: "chelsea-gray", name: "Chelsea Gray Decor", price: 0, image: "/images/decor/chelsea-gray.webp" }],
-    Electronics: [
-        ["cameras", "4 Camera System", 1400, "4-camera-system.webp"], ["weather", "Arctic Weather Package", 2800, "arctic-weather-package-twin-30-000-btu-furnaces-2nd-12-volt-heat-pad-on-fresh-tank-insulated-pex-lines.jpg"],
-        ["touch-pads", "ASA Electric Touch Pads", 550, "asa-electric-touch-pads.webp"], ["water-heater", "On-demand Water Heater", 900, "on-demand-water-heater.webp"],
-        ["solar", "Personalized Solar Package", 3900, "personalized-solar-package-ranges.jpg"], ["surge", "Portable Surge Protector", 350, "portable-surge-protector.webp"],
-        ["shades", "Power Night Roller Shades", 1800, "power-night-roller-shades-remote-operated.jpg"], ["queen-bed", "Queen Bed IPO King", 500, "queen-bed-ipo-king-w-large-nightstands.webp"],
-        ["see-level", "SeeLevel Monitoring", 475, "see-level-monitoring.webp"], ["weboost", "weBoost Drive X 5G", 850, "we-boost-antenna-drive-x-5g.jpg"],
-        ["winegard", "Winegard 360 w/ 5G Gateway", 1100, "winegard-360-w-5g-gateway.jpg"],
-    ].map(([id, name, price, file]) => ({ id, name, price, image: `/images/electronics/${file}` })) as Upgrade[],
-    Paint: [
-        { id: "paint-2-color-standard", name: "2 Color (Standard)", price: 0, image: "/images/paint/2-color-standard.webp" },
-        { id: "paint-velocity", name: "Velocity", price: 4400, image: "/images/paint/velocity-elite.webp" },
-        { id: "paint-3-color-elite", name: "3 Color (Elite)", price: 7400, image: "/images/paint/3-color-elite-standard.webp" },
-        { id: "paint-tsunami", name: "Tsunami", price: 10500, image: "/images/paint/tsunami-elite.webp" },
-    ],
-};
-
-const money = (value: number) => `$${value.toLocaleString("en-US")}`;
-const upgradeCategories = Object.keys(upgradeGroups);
+const money = (value: number) => value < 0
+    ? `-$${Math.abs(value).toLocaleString("en-US")}`
+    : `$${value.toLocaleString("en-US")}`;
 const countryNames = new Intl.DisplayNames(["en"], { type: "region" });
 const countries = getCountries()
     .filter((code) => code !== "XK")
@@ -143,8 +98,18 @@ export default function RightPanel() {
     const activeModel = getModelConfiguration(activeModelId);
     const floorPlans = activeModel.floorPlans;
     const selectedPlan = floorPlans.find((plan) => plan.id === selectedFloorPlanId) ?? floorPlans[0];
+    const upgradeGroups = useMemo(
+        () => getUpgradeGroups(activeModelId, selectedPlan.name),
+        [activeModelId, selectedPlan.name],
+    );
+    const upgradeCategories = Object.keys(upgradeGroups);
+    const activeUpgradeItems = upgradeGroups[group]
+        ?? upgradeGroups.Interior
+        ?? Object.values(upgradeGroups)[0]
+        ?? [];
     const upgradesTotal = useMemo(() => Object.values(selected).reduce((sum, item) => sum + item.price, 0), [selected]);
-    const basePrice = activeModel.basePrice;
+    const previousConfigurationRef = useRef({ activeModelId, selectedFloorPlanId });
+    const basePrice = selectedPlan.basePrice;
     const animatedUpgradesTotal = useAnimatedNumber(upgradesTotal);
     const animatedEstimatedTotal = useAnimatedNumber(basePrice + upgradesTotal);
     const fullPhone = `+${getCountryCallingCode(country)}${contact.phone.replace(/\D/g, "")}`;
@@ -272,6 +237,22 @@ export default function RightPanel() {
     }, []);
 
     useEffect(() => {
+        const previous = previousConfigurationRef.current;
+        if (
+            previous.activeModelId === activeModelId
+            && previous.selectedFloorPlanId === selectedFloorPlanId
+        ) return;
+
+        previousConfigurationRef.current = { activeModelId, selectedFloorPlanId };
+        setSelected({});
+        setStep(1);
+        setGroup("Interior");
+        setPreview(null);
+        setSummaryOpen(false);
+        setPreparedPayload(null);
+    }, [activeModelId, selectedFloorPlanId]);
+
+    useEffect(() => {
         phoneRef.current?.setCustomValidity(
             contact.phone && !isPhoneValid
                 ? "Enter a valid phone number for the selected country."
@@ -354,7 +335,11 @@ export default function RightPanel() {
         const next = { ...current };
         if (next[item.id]) delete next[item.id];
         else {
-            if (item.id.startsWith("paint-")) Object.keys(next).filter((id) => id.startsWith("paint-")).forEach((id) => delete next[id]);
+            if (item.restriction && item.restriction !== "None") {
+                Object.keys(next)
+                    .filter((id) => next[id].restriction === item.restriction)
+                    .forEach((id) => delete next[id]);
+            }
             next[item.id] = item;
         }
         return next;
@@ -436,7 +421,7 @@ export default function RightPanel() {
                     {upgradeCategories.map((name) => <button key={name} role="tab" aria-selected={group === name} className={group === name ? "active" : ""} onClick={() => { if (!dragRef.current.moved) setGroup(name); dragRef.current.moved = false; }}>{name}</button>)}
                 </div>
                 <div className="upgrade-grid">
-                    {upgradeGroups[group].map((item) => <div key={item.id} role="button" tabIndex={0} className={`upgrade-card ${selected[item.id] ? "selected" : ""}`} onClick={() => toggleUpgrade(item)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggleUpgrade(item); } }}>
+                    {activeUpgradeItems.map((item) => <div key={item.id} role="button" tabIndex={0} className={`upgrade-card ${selected[item.id] ? "selected" : ""}`} onClick={() => toggleUpgrade(item)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggleUpgrade(item); } }}>
                         <span className="upgrade-image"><img src={item.image} alt={item.name} />{selected[item.id] && <img src="/icons/check-circle.png" className="check-icon" alt="Selected" />}
                             <span className="zoom-button" role="button" aria-label={`Preview ${item.name}`} onClick={(event) => { event.stopPropagation(); setPreview(item); }}><img src="/icons/zoom-in.png" alt="" /></span>
                         </span>
