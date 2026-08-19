@@ -271,5 +271,5 @@ export const getModelConfiguration = (modelId: string) =>
 export const getFloorPlan = (modelId: string, floorPlanId: string) =>
     getModelConfiguration(modelId).floorPlans.find((plan) => plan.id === floorPlanId);
 
-export const cameraViews = ["Front View", "Back View", "Left View", "Right View"];
+export const cameraViews = ["Front View", "Left View", "Back View", "Right View"];
 

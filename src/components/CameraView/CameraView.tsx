@@ -33,8 +33,8 @@ const CameraView = () => {
         ? interiorViews
         : [
             { label: "Front View", image: "/images/exterior option view mode/frontview.png", camera: "front" },
-            { label: "Back View", image: "/images/exterior option view mode/backview.png", camera: "back" },
             { label: "Left View", image: "/images/exterior option view mode/leftview.png", camera: "left" },
+            { label: "Back View", image: "/images/exterior option view mode/backview.png", camera: "back" },
             { label: "Right View", image: "/images/exterior option view mode/rightview.png", camera: "right" },
         ].map((view) => ({
             ...view,

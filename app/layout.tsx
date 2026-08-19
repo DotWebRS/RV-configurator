@@ -11,8 +11,12 @@ import "../src/components/CameraView/CameraView.css";
 import "../src/ResponsiveLayout.css";
 
 export const metadata: Metadata = {
-  title: "RV Configurator",
-  description: "Configure your Luxe RV.",
+  title: "Build Your Own Luxury Fifth Wheel",
+  description:
+    "Build your own luxury fifth wheel or toy hauler with THE Luxe Fifth Wheel online builder. We build true four season fifth wheels and toy haulers.",
+  icons: {
+    icon: "/icons/logo.jpg",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
