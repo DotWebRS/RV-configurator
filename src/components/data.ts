@@ -227,10 +227,10 @@ export const modelConfigurations: ModelConfiguration[] = [
         name: "Luxe Elite",
         basePrice: 226979,
         floorPlans: [
-            createFloorPlan({ id: "elite-39fb", name: "39FB", modelPath: "threejs-assets/Elite/models/39FB/Luxe_elite_39FB.glb", image: "/images/floorplans/Elite 39FB.jpg", rooms: floorPlanRoomCoordinates["elite-39fb"] }),
-            createFloorPlan({ id: "elite-42rl", name: "42RL", modelPath: "threejs-assets/Elite/models/42RL/Luxe_elite_LF_42RL.glb", image: "/images/floorplans/Elite 42RL.jpg", rooms: floorPlanRoomCoordinates["elite-42rl"] }),
+            createFloorPlan({ id: "elite-39fb", name: "39FB", modelPath: "threejs-assets/Elite/models/39FB/Luxe_elite_39FB.glb", image: "/images/floorplans/Elite 39FB.png", rooms: floorPlanRoomCoordinates["elite-39fb"] }),
+            createFloorPlan({ id: "elite-42rl", name: "42RL", modelPath: "threejs-assets/Elite/models/42RL/Luxe_elite_LF_42RL.glb", image: "/images/floorplans/Elite 42RL.png", rooms: floorPlanRoomCoordinates["elite-42rl"] }),
             createFloorPlan({ id: "elite-46tb", name: "46TB", modelPath: "threejs-assets/Elite/models/46TB/Luxe_elite_LF_46TB.glb", image: "/images/floorplans/Elite 46TB.png", rooms: floorPlanRoomCoordinates["elite-46tb"] }),
-            createFloorPlan({ id: "elite-46rkb", name: "46RKB", modelPath: "threejs-assets/Elite/models/46RKB/Luxe_elite_46RKB.glb", image: "/images/floorplans/Elite 46RKB.webp", rooms: floorPlanRoomCoordinates["elite-46rkb"] }),
+            createFloorPlan({ id: "elite-46rkb", name: "46RKB", modelPath: "threejs-assets/Elite/models/46RKB/Luxe_elite_46RKB.glb", image: "/images/floorplans/Elite 46RKB.png", rooms: floorPlanRoomCoordinates["elite-46rkb"] }),
         ],
     },
     {
@@ -239,7 +239,7 @@ export const modelConfigurations: ModelConfiguration[] = [
         basePrice: 188358,
         floorPlans: [
             createFloorPlan({ id: "gold-35grs", name: "35GRS", modelPath: "threejs-assets/Gold/models/35GRS/Luxe_Gold_35GRS.glb", image: "/images/floorplans/Gold 35GRS.png", rooms: floorPlanRoomCoordinates["gold-35grs"] }),
-            createFloorPlan({ id: "gold-38gfb", name: "38GFB", modelPath: "threejs-assets/Gold/models/38GFB/Luxe_Gold_38GFB.glb", image: "/images/floorplans/Gold 38GFB.jpg", rooms: floorPlanRoomCoordinates["gold-38gfb"] }),
+            createFloorPlan({ id: "gold-38gfb", name: "38GFB", modelPath: "threejs-assets/Gold/models/38GFB/Luxe_Gold_38GFB.glb", image: "/images/floorplans/Gold 38GFB.png", rooms: floorPlanRoomCoordinates["gold-38gfb"] }),
         ],
     },
     {
@@ -249,7 +249,7 @@ export const modelConfigurations: ModelConfiguration[] = [
         floorPlans: [
             createFloorPlan({ id: "toy-hauler-46fb", name: "46FB", modelPath: "threejs-assets/Toy Hauler/models/46FB/luxeTH46fb.glb", image: "/images/floorplans/Toy hauler 46FB.png", rooms: floorPlanRoomCoordinates["toy-hauler-46fb"] }),
             createFloorPlan({ id: "toy-hauler-47fb", name: "47FB", modelPath: "threejs-assets/Toy Hauler/models/47FB/luxeTH47fb.glb", image: "/images/floorplans/Toy hauler 47FB.png", rooms: floorPlanRoomCoordinates["toy-hauler-47fb"] }),
-            createFloorPlan({ id: "toy-hauler-48fb", name: "48FB", modelPath: "threejs-assets/Toy Hauler/models/48FB/luxeTH48fb.glb", image: "/images/floorplans/Toy hauler 48FB.jpg", rooms: floorPlanRoomCoordinates["toy-hauler-48fb"] }),
+            createFloorPlan({ id: "toy-hauler-48fb", name: "48FB", modelPath: "threejs-assets/Toy Hauler/models/48FB/luxeTH48fb.glb", image: "/images/floorplans/Toy hauler 48FB.png", rooms: floorPlanRoomCoordinates["toy-hauler-48fb"] }),
         ],
     },
     {
@@ -257,7 +257,7 @@ export const modelConfigurations: ModelConfiguration[] = [
         name: "Luxe Regent",
         basePrice: 309980,
         floorPlans: [
-            createFloorPlan({ id: "regent-48flb", name: "48FLB", modelPath: "threejs-assets/Regent/models/48FLB/Regent Hauler Flyer_48FLB_(10707)_V7-optimized-2k.glb", image: "/images/floorplans/Regent 48FLB.jpg", rooms: floorPlanRoomCoordinates["regent-48flb"] }),
+            createFloorPlan({ id: "regent-48flb", name: "48FLB", modelPath: "threejs-assets/Regent/models/48FLB/Regent Hauler Flyer_48FLB_(10707)_V7-optimized-2k.glb", image: "/images/floorplans/Regent 48FLB.png", rooms: floorPlanRoomCoordinates["regent-48flb"] }),
             createFloorPlan({ id: "regent-49rh", name: "49RH", modelPath: "threejs-assets/Regent/models/49RH/Regent Hauler Flyer_49RH_F10-optimized-2k-rotated.glb", image: "/images/floorplans/Regent 49RH.png", rooms: floorPlanRoomCoordinates["regent-49rh"] }),
         ],
     },
