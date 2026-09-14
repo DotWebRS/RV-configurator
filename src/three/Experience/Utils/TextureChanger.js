@@ -7,8 +7,8 @@ function toLinearColor(color) {
     return new THREE.Color().setStyle(color, THREE.SRGBColorSpace);
 }
 
-function parsePatternColors(mesh) {
-    const value = mesh.userData?.rvPatternColors;
+function parsePatternColors(material) {
+    const value = material.userData?.rvPatternColors;
 
     if (!value) return [];
 
@@ -20,7 +20,7 @@ function parsePatternColors(mesh) {
             .filter(({ id, color }) => Number.isInteger(id) && id > 0 && HEX_COLOR.test(color));
     } catch (error) {
         console.warn(
-            `TextureChanger: mesh "${mesh.name}" has invalid rvPatternColors JSON.`,
+            `TextureChanger: material "${material.name}" has invalid rvPatternColors JSON.`,
             error,
         );
         return [];
@@ -73,35 +73,35 @@ export default class TextureChanger {
 
             if (maskedMaterials.length === 0) continue;
 
-            const meshPatterns = parsePatternColors(mesh);
-            if (meshPatterns.length === 0) {
-                console.warn(
-                    `TextureChanger: mesh "${mesh.name}" has a masked texture but no rvPatternColors.`,
-                );
-                continue;
-            }
-
-            for (const { id, color } of meshPatterns) {
-                const normalizedColor = color.toLowerCase();
-                const existing = patternsById.get(id);
-
-                if (existing && existing.originalColor !== normalizedColor) {
+            for (const { material, masks } of maskedMaterials) {
+                const materialPatterns = parsePatternColors(material);
+                if (materialPatterns.length === 0) {
                     console.warn(
-                        `TextureChanger: ID ${id} has conflicting base colors (${existing.originalColor} and ${normalizedColor}). The first value will be used.`,
+                        `TextureChanger: material "${material.name}" has a masked texture but no rvPatternColors.`,
                     );
                     continue;
                 }
 
-                if (!existing) {
-                    patternsById.set(id, {
-                        id,
-                        originalColor: normalizedColor,
-                        color: normalizedColor,
-                    });
-                }
-            }
+                for (const { id, color } of materialPatterns) {
+                    const normalizedColor = color.toLowerCase();
+                    const existing = patternsById.get(id);
 
-            for (const { material, masks } of maskedMaterials) {
+                    if (existing && existing.originalColor !== normalizedColor) {
+                        console.warn(
+                            `TextureChanger: ID ${id} has conflicting base colors (${existing.originalColor} and ${normalizedColor}). The first value will be used.`,
+                        );
+                        continue;
+                    }
+
+                    if (!existing) {
+                        patternsById.set(id, {
+                            id,
+                            originalColor: normalizedColor,
+                            color: normalizedColor,
+                        });
+                    }
+                }
+
                 if (masks.length > 1) {
                     console.warn(
                         `TextureChanger: material "${material.name}" contains multiple masked textures. The first one will be used.`,
