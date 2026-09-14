@@ -450,18 +450,16 @@ export default function RightPanel() {
                         </span>
                         <span className="upgrade-copy"><strong>{item.name}</strong><span>{item.price ? `+${money(item.price)}` : "Included"}</span></span>
                     </div>)}
+                    {group === "Paint" && <div className="paint-panel">
+                        <h3>Exterior Paint</h3>
+                        <p>Select a color to customize the paint pattern.</p>
+                        {patternColors.length > 0 ? <div className="paint-swatches" aria-label="Pattern colors">
+                            {patternColors.map((pattern) => <label key={pattern.id} className="paint-swatch" style={{ backgroundColor: pattern.color }} title={`Pattern ${pattern.id}: ${pattern.color}`}>
+                                <input type="color" value={pattern.color} onChange={(event) => experienceRef.current?.setTextureColor(pattern.id, event.target.value)} aria-label={`Change pattern ${pattern.id} color`} />
+                            </label>)}
+                        </div> : <p className="paint-empty">Paint colors will be available when the model finishes loading.</p>}
+                    </div>}
                 </div>
-                {/* The color picker is temporarily disabled and retained for future re-enabling.
-                {group === "Paint" && <div className="paint-panel">
-                    <h3>Exterior Paint</h3>
-                    <p>Select a color to customize the paint pattern.</p>
-                    {patternColors.length > 0 ? <div className="paint-swatches" aria-label="Pattern colors">
-                        {patternColors.map((pattern) => <label key={pattern.id} className="paint-swatch" style={{ backgroundColor: pattern.color }} title={`Pattern ${pattern.id}: ${pattern.color}`}>
-                            <input type="color" value={pattern.color} onChange={(event) => experienceRef.current?.setTextureColor(pattern.id, event.target.value)} aria-label={`Change pattern ${pattern.id} color`} />
-                        </label>)}
-                    </div> : <p className="paint-empty">Paint colors will be available when the model finishes loading.</p>}
-                </div>}
-                */}
             </div>}
 
             {!summaryOpen && step === 3 && <form className="contact-form" onSubmit={handleSubmit}>
