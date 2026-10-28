@@ -272,7 +272,7 @@ export default function RightPanel() {
         event.preventDefault();
         console.log("Build sent");
         return;
-        setPhoneTouched(true);
+        /*setPhoneTouched(true);
         setStateTouched(true);
 
         if (!contact.state) {
@@ -337,7 +337,7 @@ export default function RightPanel() {
             setSubmissionMessage(
                 error instanceof Error ? error.message : "Unable to submit your build.",
             );
-        }
+        }*/
     };
 
     const choosePlan = async (plan: FloorPlan) => {
