@@ -268,7 +268,10 @@ export default function RightPanel() {
     }, [contact.phone, country, isPhoneValid]);
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        
         event.preventDefault();
+        console.log("Build sent");
+        return;
         setPhoneTouched(true);
         setStateTouched(true);
 
